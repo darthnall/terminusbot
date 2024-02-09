@@ -1,0 +1,18 @@
+{
+   "url": {
+      "login": "https://support.wialon.com/login.html",
+      "refresh": "https://support.wialon.com/refresh.html"
+   },
+   "token": {
+       "user_perms": "TOKEN",
+       "event_perms": "TOKEN",
+       "member_perms": "TOKEN",
+       "generic_perms": "TOKEN"
+   },
+   "perm_identifier": {
+       "user": 1,
+       "event": 32,
+       "member": 89,
+       "generic": 71
+   }
+}
