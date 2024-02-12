@@ -1,37 +1,24 @@
 import requests
 import os
-import json
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class AuthSession:
-    def __init__(self, access_token):
-        self.access_token = access_token
+    def __init__(self, access_token: str | None):
+        if access_token is not None:
+            self.access_token = access_token
+        else:
+            pass
 
     def __repr__(self):
         return f'access_token: {self.access_token}'
 
-    def get_token(self, user: str, passw: str) -> str | None:
-        url = 'https://support.wialon.com/login.html'
-        data = {
-            'login': user,
-            'passw': passw
-        }
-
-        with requests.Session() as s:
-            r = s.get(url, data=data)
-            if requests.codes.ok:
-                return r.json()
-            else:
-                return None
+    def get_token(self, user: str, client_id: str, fl: int) -> str | None:
+        url = f'http://support.wialon.com/login.html?client_id={client_id}&user={user}&flags={fl}'
 
 # TODO: Automatically refresh token when it expires (30 days)
     def refresh_token(self, user: str, passw: str, access_token: str) -> str | None:
-        with open('urls.json', 'r') as f:
-            j = json.load(f)
-            url = j['url']['refresh']
-            print(url)
 
         data = {
             'login': user,
@@ -40,7 +27,10 @@ class AuthSession:
 
         return data['login']
 
+
+    def create_user(self, user_data: list[str]) -> list[str] | None:
+        svc = 'core/create_user'
+        url = f'https://hst-api.wialon.com/wialon/ajax.html?svc={svc}&params={"token": {access_token}}'
+
 if __name__ == '__main__':
-    auth = AuthSession(access_token=os.environ['WIALON_HOSTING_API_KEY'])
-    token = auth.get_token(user='Blake@terminusgps.com', passw=os.environ['WIALON_HOSTING_PASSWORD'])
-    print(token)
+    session = AuthSession(access_token=os.environ['WIALON_HOSTING_API_KEY'])
