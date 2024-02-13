@@ -29,12 +29,22 @@ class AuthSession:
         except KeyError:
             print(r)
 
-    def __exit__(self):
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        if exception_type is not None:
+            print(f'Exception: {exception_type} {exception_value} {traceback}')
+            return False
         svc = 'core/logout'
         params = {}
         url = make_url(svc=svc, sid=self.sid, params=params)
         response = requests.get(url, headers=self.headers)
-        print(response.json())
+        if response.status_code != 200:
+            print(f'__exit__ Wialon response: {response.json()}')
+            return False
+        else:
+            print(f'logout success\neid: {self.sid}\n{response.json()}')
+        return True
 
     def __repr__(self):
         details = {
@@ -47,7 +57,7 @@ class AuthSession:
         svc = 'token/update'
         params = {
             "callMode":"create",
-            "app":"terminusgps",
+            "app":"Wialon Hosting",
             "at":0,
             "dur":0,
             "fl":-1,
@@ -55,7 +65,18 @@ class AuthSession:
         }
         url = make_url(svc=svc, params=params, sid=self.sid)
         response = requests.get(url=url, headers=self.headers)
-        print(response.json())
+        try :
+            return str(response.json()['h'])
+        except KeyError:
+            print(response.json())
+            return None
+
+    def get_account_data(self) -> str | None:
+        svc = 'core/get_account_data'
+        params = {}
+        url = make_url(svc=svc, sid=self.sid, params=params)
+        response = requests.get(url=url, headers=self.headers)
+        return str(response.json())
 
     def create_user(self, username: str, password: str, flags: int) -> str | None:
         svc = 'core/create_user'
@@ -64,7 +85,6 @@ class AuthSession:
             "name":username,
             "password":password,
             "dataFlags":flags
-
         }
         url = make_url(svc=svc, sid=self.sid, params=params)
         print(url)
@@ -87,6 +107,3 @@ class AuthSession:
         }
 
         return data['login']
-
-if __name__ == '__main__':
-    session = AuthSession(access_token=os.environ['WIALON_HOSTING_API_TOKEN'])
