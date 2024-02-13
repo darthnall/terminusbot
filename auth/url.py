@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 from urllib.parse import quote
 import json
 
-def make_url(svc: str, sid: str, **kwargs: str | dict | None) -> str | None:
+def make_url(svc: str, sid: str, params: dict) -> str | None:
     url = ['https://hst-api.wialon.com/wialon/ajax.html?', f'svc={svc}', f'&eid={sid}']
     s_params = json.dumps(params)
     if params:

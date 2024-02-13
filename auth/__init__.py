@@ -10,17 +10,16 @@ load_dotenv()
 class AuthSession:
     def __init__(self, access_token: str | None):
         self.headers = { "Content-Type": "application/x-www-form-urlencoded" }
+        self.access_token = access_token
+
+    def __enter__(self):
+        svc = 'token/login'
         params = {
-            "token":access_token,
+            "token":self.access_token,
             "fl":1
         }
 
-        if access_token is None:
-            print('Error: access_token is None')
-            return None
-
-        self.access_token = access_token
-        url = make_url(svc='token/login', params=params, sid=None)
+        url = make_url(svc=svc, params=params, sid=None)
         response = requests.get(url=url, headers=self.headers)
         r = response.json()
 
@@ -30,16 +29,19 @@ class AuthSession:
         except KeyError:
             print(r)
 
+    def __exit__(self):
+        svc = 'core/logout'
+        params = {}
+        url = make_url(svc=svc, sid=self.sid, params=params)
+        response = requests.get(url, headers=self.headers)
+        print(response.json())
+
     def __repr__(self):
         details = {
             "access_token": self.access_token,
             "eid": self.sid
         }
         return json.dumps(details)
-
-    def __exit__(self):
-        params = {}
-        url = make_url(svc='core/logout', sid=self.sid, params=params)
 
     def create_token(self) -> str | None:
         svc = 'token/update'
