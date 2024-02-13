@@ -3,7 +3,7 @@ import os
 import json
 import urllib.parse
 from dotenv import load_dotenv
-from url import make_url
+from auth.url import make_url
 
 load_dotenv()
 
@@ -20,19 +20,21 @@ class AuthSession:
             return None
 
         self.access_token = access_token
+        url = make_url(svc='token/login', params=params, sid=None)
+        response = requests.get(url=url, headers=self.headers)
+        r = response.json()
 
         try:
-            url = make_url(svc='token/login', params=params, sid=None)
-            response = requests.get(url=url, headers=self.headers)
-            print(response.json())
-        except requests.JSONDecodeError:
-            print('Error: JSONDecodeError')
+            self.sid = r['eid']
+        except KeyError:
+            print(r)
 
     def __repr__(self):
         details = {
             "access_token": self.access_token,
+            "eid": self.sid
         }
-        return details
+        return json.dumps(details)
 
     def __exit__(self):
         pass
@@ -47,8 +49,13 @@ class AuthSession:
             "fl":-1,
             "p":"{}"
         }
-        url = make_url(svc=svc, params=params, sid=None)
-        print(url)
+        url = make_url(svc=svc, params=params, sid=self.sid)
+        response = requests.get(url=url, headers=self.headers)
+        print(response)
+
+    def get_token_list(self) -> list | None:
+        svc = 'token/list'
+        url = make_url(svc=svc, params=None, sid=self.sid)
         response = requests.get(url=url, headers=self.headers)
         print(response.json())
 
@@ -70,5 +77,4 @@ class AuthSession:
         url = f'https://hst-api.wialon.com/wialon/ajax.html?svc={svc}&params={params}'
 
 if __name__ == '__main__':
-    session = AuthSession(access_token=os.environ['WIALON_HOSTING_API_KEY'])
-    session.create_token()
+    session = AuthSession(access_token=os.environ['WIALON_HOSTING_API_TOKEN'])
