@@ -23,6 +23,7 @@ class AuthSession:
         url = make_url(svc='token/login', params=params, sid=None)
         response = requests.get(url=url, headers=self.headers)
         r = response.json()
+        print(f'session eid: {r["eid"]}')
 
         try:
             self.sid = r['eid']
@@ -51,7 +52,7 @@ class AuthSession:
         }
         url = make_url(svc=svc, params=params, sid=self.sid)
         response = requests.get(url=url, headers=self.headers)
-        print(response)
+        print(response.json())
 
     def get_token_list(self) -> list | None:
         svc = 'token/list'
