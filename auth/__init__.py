@@ -18,8 +18,7 @@ class AuthSession:
             "token":self.access_token,
             "fl":1
         }
-
-        url = make_url(svc=svc, params=params, sid=None)
+        url = make_url(sid=None, svc=svc, params=params)
         response = requests.get(url=url, headers=self.headers)
         r = response.json()
 
@@ -73,7 +72,7 @@ class AuthSession:
 
     def get_account_data(self) -> str | None:
         svc = 'core/get_account_data'
-        params = {}
+        params = { "type": 1 }
         url = make_url(svc=svc, sid=self.sid, params=params)
         response = requests.get(url=url, headers=self.headers)
         return str(response.json())
