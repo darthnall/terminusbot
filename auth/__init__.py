@@ -8,51 +8,47 @@ load_dotenv()
 class AuthSession:
     def __init__(self, access_token: str | None):
         self.headers = { "Content-Type": "application/x-www-form-urlencoded" }
-        if access_token is not None:
-            self.access_token = access_token
+        params = {
+            "token": access_token,
+            "fl": 1
+        }
+
+        if access_token is None:
+            print('Error: access_token is None')
+            return None
+
+        self.access_token = access_token
+
         try:
-            with open('data.json', 'r') as data:
-                data = json.load(data)
-            try:
-                params = {
-                    "token": access_token,
-                    "fl": 1
-                }
-                print(params)
-                url = f'https://hst-api.wialon.com/wialon/ajax.html?svc=token/login&params={params}'
-                response = requests.get(url=url, headers=self.headers)
-                print(response.json())
-            except requests.JSONDecodeError:
-                print('Error: JSONDecodeError')
-        except FileNotFoundError:
-            print('data.json not found')
+            url = make_url(svc='token/login', params=params)
+            response = requests.get(url=url, headers=self.headers)
+            print(response.json())
+        except requests.JSONDecodeError:
+            print('Error: JSONDecodeError')
 
     def __repr__(self):
-        if self.access_token is None:
-            return f'access_token: None'
-        else:
-            return f'access_token: {self.access_token}'
+        details = {
+            "access_token": self.access_token,
+        }
+        return details
 
-    def token_update(self, **kwargs: str) -> str | None:
-        for key, value in kwargs.items():
-            if key == 'access_token':
-                self.access_token = value
-                return self.access_token
-            else:
-                return None
+    def __exit__(self):
+        pass
 
-    def get_token(self, access_token: str | None, fl: int) -> str | None:
-        try:
-            svc = 'token/login'
-            params = {
-                "token": access_token,
-                "fl": fl
-            }
-            url = f'https://hst-api.wialon.com/wialon/ajax.html?svc={svc}&params={params}'
-            response = requests.get(url, headers=self.headers)
-            return response.json()
-        except TypeError:
-            return None
+    def create_token(self) -> str | None:
+        svc = 'token/update'
+        params = {
+            "callMode": "create",
+            "app": "terminusgps",
+            "at": 0,
+            "dur": 0,
+            "fl": -1,
+            "p": "{}"
+        }
+        url = make_url(svc=svc, params=params, sid=None)
+        response = requests.get(url=url, headers=self.headers)
+        print(response.json())
+
 
 #   TODO: Automatically refresh token when it expires (30 days)
     def refresh_token(self, user: str, passw: str, access_token: str | None) -> str | None:
@@ -70,6 +66,13 @@ class AuthSession:
         params = {}
         url = f'https://hst-api.wialon.com/wialon/ajax.html?svc={svc}&params={params}'
 
+def make_url(svc: str, params: dict, sid: str | None) -> str | None:
+    if sid is None:
+        url = f'https://hst-api.wialon.com/wialon/ajax.html?svc={svc}&params={params}'
+        return url
+    url = f'https://hst-api.wialon.com/wialon/ajax.html?svc={svc}&params={params}&sid={sid}'
+    return url
+
 if __name__ == '__main__':
     session = AuthSession(access_token=os.environ['WIALON_HOSTING_API_KEY'])
-    session.get_token(access_token=os.environ['WIALON_HOSTING_API_KEY'], fl=1)
+    session.create_token()

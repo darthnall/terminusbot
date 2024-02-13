@@ -3,10 +3,10 @@ from qrcode import constants
 
 if __name__ == "__main__":
     qr = QRCode(
-            version=1,
-            error_correction=constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
+        version=1,
+        error_correction=constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
     )
 
     qr.add_data('https://hosting.wialon.com/login.html?user=Blake@terminusgps.com')
