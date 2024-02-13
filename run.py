@@ -5,4 +5,4 @@ import os
 load_dotenv()
 
 s = AuthSession(access_token=os.environ['WIALON_HOSTING_API_TOKEN'])
-s.get_token_list()
+s.create_user(username='iwascreatedbypython', password='terminusgps', flags=1)

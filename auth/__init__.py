@@ -23,10 +23,10 @@ class AuthSession:
         url = make_url(svc='token/login', params=params, sid=None)
         response = requests.get(url=url, headers=self.headers)
         r = response.json()
-        print(f'session eid: {r["eid"]}')
 
         try:
             self.sid = r['eid']
+            print(f'login success\neid: {r["eid"]}')
         except KeyError:
             print(r)
 
@@ -38,7 +38,8 @@ class AuthSession:
         return json.dumps(details)
 
     def __exit__(self):
-        pass
+        params = {}
+        url = make_url(svc='core/logout', sid=self.sid, params=params)
 
     def create_token(self) -> str | None:
         svc = 'token/update'
@@ -51,6 +52,20 @@ class AuthSession:
             "p":"{}"
         }
         url = make_url(svc=svc, params=params, sid=self.sid)
+        response = requests.get(url=url, headers=self.headers)
+        print(response.json())
+
+    def create_user(self, username: str, password: str, flags: int) -> str | None:
+        svc = 'core/create_user'
+        params = {
+            "creatorId":"terminusgps",
+            "name":username,
+            "password":password,
+            "dataFlags":flags
+
+        }
+        url = make_url(svc=svc, sid=self.sid, params=params)
+        print(url)
         response = requests.get(url=url, headers=self.headers)
         print(response.json())
 
@@ -70,12 +85,6 @@ class AuthSession:
         }
 
         return data['login']
-
-
-    def create_user(self, user_data: dict) -> dict | None:
-        svc = 'core/create_user'
-        params = {}
-        url = f'https://hst-api.wialon.com/wialon/ajax.html?svc={svc}&params={params}'
 
 if __name__ == '__main__':
     session = AuthSession(access_token=os.environ['WIALON_HOSTING_API_TOKEN'])
