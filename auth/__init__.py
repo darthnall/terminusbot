@@ -1,11 +1,13 @@
-import requests
-import os
+import datetime
 import json
+import logging
+import os
+import pprint
+import requests
 import urllib.parse
 from dotenv import load_dotenv
 from auth.url import make_url
-import logging
-import datetime
+from auth.url import req
 
 # Load environment variables and set up logging
 load_dotenv()
@@ -31,12 +33,9 @@ class AuthSession:
             "token":self.access_token,
             "fl":1
         }
-        url = make_url(sid=None, svc=svc, params=params)
-        logging.debug(f'login url: {url}')
+        r = req(sid=None, svc=svc, params=params)
         # Retrieve session id from response
-        response = requests.post(url=url, headers=self.headers)
-        r = response.json()
-        print(r)
+        logging.info(f'login response: {r}')
 
         try:
             self.sid = r['eid']
@@ -58,18 +57,17 @@ class AuthSession:
         # Gracefully logout of session
         svc = 'core/logout'
         params = {}
-        url = make_url(sid=self.sid, svc=svc, params=params)
-        logging.debug(f'logout url: {url}')
-        response = requests.post(url=url, headers=self.headers)
+        r = req(sid=self.sid, svc=svc, params=params)
 
-        if response.status_code != 200:
+        if r.status_code != 200:
             logger.warn(f'logout failed')
-            logger.warn(f'response: {response.json()}')
+            logger.info(f'session eid: {self.sid}')
+            logger.warn(f'response: {r.json()}')
             return False
         else:
             logger.info(f'logout success')
             logger.info(f'session eid: {self.sid}')
-            logger.debug(f'response: {response.json()}')
+            logger.debug(f'response: {r.json()}')
         return True
 
     def __repr__(self):
@@ -113,15 +111,13 @@ class AuthSession:
         logging.info(f'Creating user {username}')
         logging.info(f'user parameters {params}')
 
-        url = make_url(sid=self.sid, svc=svc, params=params)
-        logging.debug(f'create_user url: {url}')
-        response = requests.post(url=url, headers=self.headers)
-        return response.json()
+        r = req(sid=self.sid, svc=svc, params=params)
+        return r
 
     def get_token_list(self) -> dict | None:
         svc = 'token/list'
         params = {}
         url = make_url(sid=self.sid, svc=svc, params=params)
         logging.debug(f'get_token_list url: {url}')
-        response = requests.post(url=url, headers=self.headers)
-        return response.json()
+        r = req(sid=self.sid, svc=svc, params=params)
+        return r
