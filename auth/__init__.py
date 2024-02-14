@@ -34,8 +34,9 @@ class AuthSession:
         url = make_url(sid=None, svc=svc, params=params)
         logging.debug(f'login url: {url}')
         # Retrieve session id from response
-        response = requests.get(url=url, headers=self.headers)
+        response = requests.post(url=url, headers=self.headers)
         r = response.json()
+        print(r)
 
         try:
             self.sid = r['eid']
@@ -59,7 +60,7 @@ class AuthSession:
         params = {}
         url = make_url(sid=self.sid, svc=svc, params=params)
         logging.debug(f'logout url: {url}')
-        response = requests.get(url, headers=self.headers)
+        response = requests.post(url=url, headers=self.headers)
 
         if response.status_code != 200:
             logger.warn(f'logout failed')
@@ -78,30 +79,26 @@ class AuthSession:
         }
         return json.dumps(details)
 
-    def get_account_data(self, flags: int = 1, flag: int = 1) -> dict | None:
+    def get_account_data(self, flags: int = 1) -> dict | None:
         # Get account data of current authenticated user
         valid_flags = [1, 2]
-        if flag:
-            flags = flag
-
         if flags not in valid_flags:
-            print(f'Invalid flags: {flags}\nuse 1 or 2')
+            logger.warn(f'Invalid flags: {flags}')
+            logger.warn(f'use {valid_flags}')
             return None
 
         svc = 'core/get_account_data'
         params = { "type": flags }
         url = make_url(sid=self.sid, svc=svc, params=params)
-        response = requests.get(url=url, headers=self.headers)
+        logging.debug(f'get_account_data url: {url}')
+        response = requests.post(url=url, headers=self.headers)
         return response.json()
 
-    def create_user(self, username: str, password: str, flags: int, flag: int) -> dict | None:
-        # TODO: Finish writing this function, these flags are random numbers I chose
-        valid_flags = [1, 4, 32]
-        if flag:
-            flags = flag
+    def create_user(self, username: str, password: str, flags: int) -> dict | None:
+        valid_flags = [1, 2, 4, 8, 32, 64]
         if flags not in valid_flags:
             logger.warn(f'Invalid flags: {flags}')
-            logger.warn(f'use 1, 4, or 32')
+            logger.warn(f'use {valid_flags}')
             return None
 
         svc = 'core/create_user'
@@ -111,18 +108,20 @@ class AuthSession:
             "password":password,
             "dataFlags":flags
         }
+
+        # Log new user
+        logging.info(f'Creating user {username}')
+        logging.info(f'user parameters {params}')
+
         url = make_url(sid=self.sid, svc=svc, params=params)
-        response = requests.get(url=url, headers=self.headers)
+        logging.debug(f'create_user url: {url}')
+        response = requests.post(url=url, headers=self.headers)
         return response.json()
 
     def get_token_list(self) -> dict | None:
         svc = 'token/list'
         params = {}
         url = make_url(sid=self.sid, svc=svc, params=params)
-        response = requests.get(url=url, headers=self.headers)
+        logging.debug(f'get_token_list url: {url}')
+        response = requests.post(url=url, headers=self.headers)
         return response.json()
-
-
-#   TODO: Automatically refresh token when it expires (30 days)
-    def refresh_token(self, user: str, passw: str, access_token: str | None) -> str | None:
-        pass
