@@ -1,10 +1,13 @@
 certifi==2024.2.2
 charset-normalizer==3.3.2
+future==0.18.3
 idna==3.6
 pillow==10.2.0
 pypng==0.20220715.0
 python-dotenv==1.0.1
+python-wialon==1.2.3
 qrcode==7.4.2
 requests==2.31.0
+simplejson==3.19.2
 typing_extensions==4.9.0
 urllib3==2.2.0
