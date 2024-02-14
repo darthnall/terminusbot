@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 from auth.url import make_url
 import logging
 import datetime
-import sys
 
 # Load environment variables and set up logging
 load_dotenv()
@@ -127,6 +126,3 @@ class AuthSession:
 #   TODO: Automatically refresh token when it expires (30 days)
     def refresh_token(self, user: str, passw: str, access_token: str | None) -> str | None:
         pass
-
-if __name__ == "__main__":
-    print(logger)
