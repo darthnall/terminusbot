@@ -24,7 +24,7 @@ class AuthSession:
 
         try:
             self.sid = r['eid']
-            print(f'login success\neid: {r["eid"]}')
+            print(f'login success\n\neid: {r["eid"]}')
         except KeyError:
             print(r)
 
@@ -34,15 +34,17 @@ class AuthSession:
         if exception_type is not None:
             print(f'Exception: {exception_type} {exception_value} {traceback}')
             return False
+
         svc = 'core/logout'
         params = {}
-        url = make_url(svc=svc, sid=self.sid, params=params)
+        url = make_url(sid=self.sid, svc=svc, params=params)
         response = requests.get(url, headers=self.headers)
+
         if response.status_code != 200:
             print(f'__exit__ Wialon response: {response.json()}')
             return False
         else:
-            print(f'logout success\neid: {self.sid}\n{response.json()}')
+            print(f'{response.json()}\n\nlogout success\n\neid: {self.sid}')
         return True
 
     def __repr__(self):
@@ -52,57 +54,39 @@ class AuthSession:
         }
         return json.dumps(details)
 
-    def create_token(self) -> str | None:
-        svc = 'token/update'
-        params = {
-            "callMode":"create",
-            "app":"Wialon Hosting",
-            "at":0,
-            "dur":0,
-            "fl":-1,
-            "p":"{}"
-        }
-        url = make_url(svc=svc, params=params, sid=self.sid)
-        response = requests.get(url=url, headers=self.headers)
-        try :
-            return str(response.json()['h'])
-        except KeyError:
-            print(response.json())
+    def get_account_data(self, flags: int = 1, flag: int = 1) -> dict | None:
+        valid_flags = [1, 2]
+        if flag:
+            flags = flag
+
+        if flags not in valid_flags:
+            print(f'Invalid flags: {flags}\nuse 1 or 2')
             return None
 
-    def get_account_data(self) -> str | None:
         svc = 'core/get_account_data'
-        params = { "type": 1 }
-        url = make_url(svc=svc, sid=self.sid, params=params)
+        params = { "type":flags }
+        url = make_url(sid=self.sid, svc=svc, params=params)
         response = requests.get(url=url, headers=self.headers)
-        return str(response.json())
+        return response.json()
 
-    def create_user(self, username: str, password: str, flags: int) -> str | None:
+    def create_user(self, username: str, password: str, flags: int) -> dict | None:
         svc = 'core/create_user'
         params = {
-            "creatorId":"terminusgps",
+            "creatorId":os.environ['CREATOR_ID'],
             "name":username,
             "password":password,
             "dataFlags":flags
         }
         url = make_url(svc=svc, sid=self.sid, params=params)
-        print(url)
         response = requests.get(url=url, headers=self.headers)
-        print(response.json())
 
     def get_token_list(self) -> list | None:
         svc = 'token/list'
-        url = make_url(svc=svc, params=None, sid=self.sid)
+        url = make_url(svc=svc, sid=self.sid, params=params)
         response = requests.get(url=url, headers=self.headers)
         print(response.json())
 
 
 #   TODO: Automatically refresh token when it expires (30 days)
     def refresh_token(self, user: str, passw: str, access_token: str | None) -> str | None:
-
-        data = {
-            'login':user,
-            'passw':passw
-        }
-
-        return data['login']
+        pass
