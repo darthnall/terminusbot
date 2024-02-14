@@ -6,12 +6,13 @@ from dotenv import load_dotenv
 from auth.url import make_url
 import logging
 import datetime
+import sys
 
 # Load environment variables and set up logging
 load_dotenv()
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-        filename=f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}-session.log',
+        filename=f'./auth/logs/session.log',
         format='[%(levelname)s] [%(asctime)s]: %(message)s',
         level=logging.DEBUG
 )
@@ -42,16 +43,16 @@ class AuthSession:
             logger.info(f'login success')
             logger.info(f'session eid: {r["eid"]}')
         except KeyError:
-            logger.critical(f'unexpected response')
-            logger.critical(f'response: {r}')
+            logger.error(f'unexpected response')
+            logger.error(f'response: {r}')
 
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
         # If session interrupted, log exception and traceback
         if exception_type is not None:
-            logger.critical(f'session interrupted by exception')
-            logger.critical(f'exception: {exception_type} {exception_value} {traceback}')
+            logger.error(f'session interrupted by exception')
+            logger.error(f'exception: {exception_type} {exception_value} {traceback}')
             return False
 
         # Gracefully logout of session
@@ -62,8 +63,8 @@ class AuthSession:
         response = requests.get(url, headers=self.headers)
 
         if response.status_code != 200:
-            logger.critical(f'logout failed')
-            logger.critical(f'response: {response.json()}')
+            logger.warn(f'logout failed')
+            logger.warn(f'response: {response.json()}')
             return False
         else:
             logger.info(f'logout success')
@@ -126,3 +127,6 @@ class AuthSession:
 #   TODO: Automatically refresh token when it expires (30 days)
     def refresh_token(self, user: str, passw: str, access_token: str | None) -> str | None:
         pass
+
+if __name__ == "__main__":
+    print(logger)
