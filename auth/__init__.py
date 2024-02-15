@@ -1,123 +1,64 @@
-import datetime
-import json
-import logging
+import dotenv
 import os
-import pprint
-import requests
-import urllib.parse
-from dotenv import load_dotenv
-from auth.url import make_url
-from auth.url import req
+from pprint import pprint
+from wialon import Wialon, WialonError
 
-# Load environment variables and set up logging
-load_dotenv()
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-        filename=f'./auth/logs/session.log',
-        format='[%(levelname)s] [%(asctime)s]: %(message)s',
-        level=logging.DEBUG
-)
+dotenv.load_dotenv()
+wialon_api = Wialon()
 
+token = os.environ['WIALON_HOSTING_API_TOKEN']
+login = wialon_api.token_login(token=token)
+wialon_api.sid = login['eid']
 
-class AuthSession:
+class Session:
     def __init__(self, access_token: str):
-        # Required headers for all requests
-        self.headers = { "Content-Type": "application/x-www-form-urlencoded" }
-        # Access token for authentication, must be provided
         self.access_token = access_token
-
+        self.login = wialon_api.token_login(token=access_token)
+        self.sid = self.login['eid']
     def __enter__(self):
-        # Login to wialon api using provided access token
-        svc = 'token/login'
-        params = {
-            "token":self.access_token,
-            "fl":1
-        }
-        r = req(sid=None, svc=svc, params=params)
-        # Retrieve session id from response
-        logging.info(f'login response: {r}')
-
-        try:
-            self.sid = r['eid']
-            logger.info(f'login success')
-            logger.info(f'session eid: {r["eid"]}')
-        except KeyError:
-            logger.error(f'unexpected response')
-            logger.error(f'response: {r}')
-
         return self
+    def __exit__(self, type, value, traceback):
+        wialon_api.core_logout()
 
-    def __exit__(self, exception_type, exception_value, traceback):
-        # If session interrupted, log exception and traceback
-        if exception_type is not None:
-            logger.error(f'session interrupted by exception')
-            logger.error(f'exception: {exception_type} {exception_value} {traceback}')
-            return False
+    def create_unit():
+        return response
 
-        # Gracefully logout of session
-        svc = 'core/logout'
-        params = {}
-        r = req(sid=self.sid, svc=svc, params=params)
+    # Does not provide user ID, only billing information for user
+    def get_account_data(_type: int):
+        response = wialon_api.core_get_account_data(
+            type=_type
+        )
+        return response
 
-        if r.status_code != 200:
-            logger.warn(f'logout failed')
-            logger.info(f'session eid: {self.sid}')
-            logger.warn(f'response: {r.json()}')
-            return False
-        else:
-            logger.info(f'logout success')
-            logger.info(f'session eid: {self.sid}')
-            logger.debug(f'response: {r.json()}')
-        return True
+    def create_user(creatorId: int, name: str, password: str, dataFlags: int):
+        response = wialon_api.core_create_user(
+                creatorId=creatorId,
+                name=name,
+                password=password,
+                dataFlags=dataFlags
+        )
+        return response
 
-    def __repr__(self):
-        details = {
-            "access_token": self.access_token,
-            "eid": self.sid
-        }
-        return json.dumps(details)
+    def search_items(itemsType: str, propName: str, propValueMask: str, sortType: str, force: int, flags: int):
+        response = wialon_api.core_search_items(
+            itemsType=itemsType,
+            propName=propName,
+            propValueMask=propValueMask,
+            sortType=sortType,
+            force=force,
+            flags=flags,
+        )
+        return response
 
-    def get_account_data(self, flags: int = 1) -> dict | None:
-        # Get account data of current authenticated user
-        valid_flags = [1, 2]
-        if flags not in valid_flags:
-            logger.warn(f'Invalid flags: {flags}')
-            logger.warn(f'use {valid_flags}')
-            return None
 
-        svc = 'core/get_account_data'
-        params = { "type": flags }
-        url = make_url(sid=self.sid, svc=svc, params=params)
-        logging.debug(f'get_account_data url: {url}')
-        response = requests.post(url=url, headers=self.headers)
-        return response.json()
 
-    def create_user(self, username: str, password: str, flags: int) -> dict | None:
-        valid_flags = [1, 2, 4, 8, 32, 64]
-        if flags not in valid_flags:
-            logger.warn(f'Invalid flags: {flags}')
-            logger.warn(f'use {valid_flags}')
-            return None
 
-        svc = 'core/create_user'
-        params = {
-            "creatorId":os.environ['CREATOR_ID'],
-            "name":username,
-            "password":password,
-            "dataFlags":flags
-        }
-
-        # Log new user
-        logging.info(f'Creating user {username}')
-        logging.info(f'user parameters {params}')
-
-        r = req(sid=self.sid, svc=svc, params=params)
-        return r
-
-    def get_token_list(self) -> dict | None:
-        svc = 'token/list'
-        params = {}
-        url = make_url(sid=self.sid, svc=svc, params=params)
-        logging.debug(f'get_token_list url: {url}')
-        r = req(sid=self.sid, svc=svc, params=params)
-        return r
+if __name__ == '__main__':
+    try:
+        #password = 'Pa%24%24w0rd'
+        #response = create_user(creatorId=os.environ['CREATOR_ID'], name='test_user', password=password, dataFlags=2)
+        response = search_items(itemsType='user', propName='sys_name', propValueMask='AJ Exotic', sortType='sys_name', force=1, flags=1)
+        pprint(response)
+        wialon_api.core_logout()
+    except WialonError as e:
+        print(e)
