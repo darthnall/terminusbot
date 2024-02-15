@@ -11,7 +11,7 @@ class Session:
         self.token = token
 
     def __enter__(self):
-        login = self.wialon_api.token_login(token=token)
+        login = self.wialon_api.token_login(token=self.token)
         self.wialon_api.sid = login['eid']
         return self
 
