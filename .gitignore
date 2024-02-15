@@ -2,6 +2,7 @@
 !.gitignore
 
 __pycache__/
+experimental/
 
 *.log
 data.json
