@@ -30,13 +30,13 @@ class Session:
         return response
 
     # Does not provide user ID, only billing information for user
-    def get_account_data(self, _type: int):
-        response = self.wialon_api.core_get_account_data(
-            type=_type
-        )
+    def get_account_data(self, params: dict | None):
+        if params is None:
+            params = {}
+        response = self.wialon_api.core_get_account_data(params=params)
         return response
 
-    def create_user(self, creatorId: int, name: str, password: str, dataFlags: int):
+    def create_user(self, params: dict | None):
         response = self.wialon_api.core_create_user(
                 creatorId=creatorId,
                 name=name,
@@ -45,21 +45,10 @@ class Session:
         )
         return response
 
-    def search_items(self, itemsType: str, propName: str, propValueMask: str, sortType: str, force: int, flags: int):
-        response = self.wialon_api.core_search_items(
-            {
-                'spec': {
-                    'itemsType': itemsType,
-                    'propName': propName,
-                    'propValueMask': propValueMask,
-                    'sortType': sortType,
-                    'force': force,
-                    'flags': flags,
-                    'from': 0,
-                    'to': 0
-                }
-            }
-        )
+    def search_items(self, params: dict | None):
+        if params is None:
+            params = {}
+        response = self.wialon_api.core_search_items(params)
         return response
 
 
@@ -69,6 +58,9 @@ if __name__ == '__main__':
     token = os.environ['WIALON_HOSTING_API_TOKEN']
     try:
         with Session(token=token) as session:
-            print('nice')
+            params = {
+                    'type': 1
+            }
+            session.get_account_data()
     except WialonError as e:
         print(f'Error code {e._code}, msg: {e._text}')
