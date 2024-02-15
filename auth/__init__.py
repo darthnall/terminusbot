@@ -50,12 +50,4 @@ class Session:
 
 
 if __name__ == '__main__':
-    token = os.environ['WIALON_HOSTING_API_TOKEN']
-    try:
-        with Session(token=token) as session:
-            params = {
-                    'type': 1
-            }
-            pprint(session.get_account_data(params=params))
-    except WialonError as e:
-        print(f'Error code {e._code}, msg: {e._text}')
+    pass

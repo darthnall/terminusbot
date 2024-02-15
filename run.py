@@ -7,9 +7,13 @@ import pprint
 load_dotenv()
 
 def main():
-    with Session(access_token=os.environ['WIALON_HOSTING_API_TOKEN']) as session:
-        _id = os.environ['CREATOR_ID']
-        pprint(session.create_user(creatorId=_id, username='iwascreatedbypython', password='Terminusgps@1', flags=1))
+    token = os.environ['WIALON_HOSTING_API_TOKEN']
+    try:
+        with Session(token=token) as session:
+            params = { 'type': 1 }
+            pprint(session.get_account_data(params=params))
+    except WialonError as e:
+        print(f'Error code {e._code}, msg: {e._text}')
 
 if __name__ == "__main__":
     main()
