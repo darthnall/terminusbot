@@ -30,25 +30,20 @@ class Session:
         return response
 
     # Does not provide user ID, only billing information for user
-    def get_account_data(self, params: dict | None):
+    def get_account_data(self, params: dict | None) -> dict | None:
         if params is None:
-            params = {}
-        response = self.wialon_api.core_get_account_data(params=params)
+            return None
+        response = self.wialon_api.core_get_account_data(**params)
         return response
 
-    def create_user(self, params: dict | None):
-        response = self.wialon_api.core_create_user(
-                creatorId=creatorId,
-                name=name,
-                password=password,
-                dataFlags=dataFlags
-        )
+    def create_user(self, params: dict | None) -> dict | None:
+        response = self.wialon_api.core_create_user(**params)
         return response
 
-    def search_items(self, params: dict | None):
+    def search_items(self, params: dict | None) -> dict | None:
         if params is None:
-            params = {}
-        response = self.wialon_api.core_search_items(params)
+            return None
+        response = self.wialon_api.core_search_items(**params)
         return response
 
 
@@ -61,6 +56,6 @@ if __name__ == '__main__':
             params = {
                     'type': 1
             }
-            session.get_account_data()
+            pprint(session.get_account_data(params=params))
     except WialonError as e:
         print(f'Error code {e._code}, msg: {e._text}')
