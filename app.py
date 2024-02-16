@@ -45,11 +45,11 @@ def create_app(wialon_token: str | None):
                         'creatorId': os.environ['WIALON_HOSTING_CREATOR_ID_DEV'],
                         'name': username,
                         'password': password,
-                        'dataFlags': 1
+                        'dataFlags': '1'
                     }
                     response = session.create_user(params=params)
             except WialonError as e:
-                return(f'Error code {e._code}, msg: {e._text}')
+                return(f'Error code {e._code}, msg: {e._text}\nparams: {params}')
 
             return render_template(
                     'submit.html',
