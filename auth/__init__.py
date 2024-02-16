@@ -1,13 +1,12 @@
 import dotenv
 import os
-from pprint import pprint
-from wialon import Wialon, WialonError
+import wialon
 
 dotenv.load_dotenv()
 
 class Session:
     def __init__(self, token: str):
-        self.wialon_api = Wialon()
+        self.wialon_api = wialon.Wialon()
         self.token = token
 
     def __enter__(self):
