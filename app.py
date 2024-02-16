@@ -3,7 +3,9 @@ from auth import Session
 from pprint import pprint
 from wialon import Wialon, WialonError
 import dotenv
+import json
 import os
+import query
 
 dotenv.load_dotenv()
 
@@ -11,28 +13,22 @@ dotenv.load_dotenv()
 def create_app(wialon_token: str | None):
     app = Flask(__name__)
 
-    @app.get("/get")
-    def account():
-        try:
-            with Session(token=wialon_token) as session:
-                params = {
-                'spec': {
-                    'itemsType': 'user',
-                    'propName': 'sys_name,sys_id',
-                    'propValueMask': '*',
-                    'sortType': 'sys_name'
-                        },
-                'force': 1,
-                'flags': 1,
-                'from': 0,
-                'to': 0
-                }
-                response = session.search_items(params=params)
-                return render_template('get.html', response=response)
-        except WialonError as e:
-            return(f'Error code {e._code}, msg: {e._text}')
+    @app.route("/api/search", methods=['GET', 'POST'])
+    def search():
+        if request.method == 'GET':
+            return render_template('search.html')
+        elif request.method == 'POST':
+            try:
+                with Session(token=wialon_token) as session:
+                    r = session.search_items(params=query.generate(request.form.get('search', '')))
+                    response = json.dumps(r, indent=2, sort_keys=True)
+                    return render_template('search-results.html', response=response)
+            except WialonError as e:
+                return(f'Error code {e._code}, msg: {e._text}')
+        else:
+            return render_template('index.html')
 
-    @app.route("/", methods=['GET', 'POST'])
+    @app.route("/api", methods=['GET', 'POST'])
     def index():
         if request.method == 'GET':
             return render_template('index.html')
