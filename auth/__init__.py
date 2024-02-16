@@ -26,6 +26,15 @@ class Session:
         return f'Session(access_token={self.access_token})'
 
     def create_unit(self):
+        if params is None:
+            return None
+        response = self.wialon_api.core_create_unit(**params)
+        return response
+
+    def create_user(self, params: dict | None) -> dict | None:
+        if params is None:
+            return None
+        response = self.wialon_api.core_create_user(**params)
         return response
 
     # Does not provide user ID, only billing information for user
@@ -35,8 +44,11 @@ class Session:
         response = self.wialon_api.core_get_account_data(**params)
         return response
 
-    def create_user(self, params: dict | None) -> dict | None:
-        response = self.wialon_api.core_create_user(**params)
+
+    def get_vin_info(self, params: dict | None) -> dict | None:
+        if params is None:
+            return None
+        response = self.wialon_api.unit_get_vin_info(**params)
         return response
 
     def search_items(self, params: dict | None) -> dict | None:
@@ -45,8 +57,11 @@ class Session:
         response = self.wialon_api.core_search_items(**params)
         return response
 
-
-
+    def set_session_property(self, params: dict | None) -> dict | None:
+        if params is None:
+            return None
+        response = self.wialon_api.core_set_session_property(**params)
+        return response
 
 if __name__ == '__main__':
     pass
