@@ -20,8 +20,8 @@ def create_app(wialon_token: str | None):
         elif request.method == 'POST':
             try:
                 with Session(token=wialon_token) as session:
-                    r = session.search_items(params=query.generate(request.form.get('search', '')))
-                    response = json.dumps(r, indent=2, sort_keys=True)
+                    keyword = request.form.get('search', '')
+                    response = session.search_items(params=auth.query.generate(keyword))
                     return render_template('search-results.html', response=response)
             except WialonError as e:
                 return(f'Error code {e._code}, msg: {e._text}')
@@ -42,7 +42,7 @@ def create_app(wialon_token: str | None):
             try:
                 with Session(token=token) as session:
                     params = {
-                        'creatorId': os.environ['WIALON_HOSTING_CREATOR_ID'],
+                        'creatorId': os.environ['WIALON_HOSTING_CREATOR_ID_DEV'],
                         'name': username,
                         'password': password,
                         'dataFlags': 1
