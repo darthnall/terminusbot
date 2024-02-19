@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from auth import Session
+from auth.session import Session
 from pprint import pprint
 from wialon import Wialon, WialonError
 import auth.query

@@ -33,3 +33,6 @@ def generate(_filter: str | None, category: str | None) -> dict | None:
             'from': 0,
             'to': 0
         }
+
+def search_hardware(_filter: str | None, category: str | None) -> dict | None:
+    pass
