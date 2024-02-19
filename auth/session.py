@@ -22,55 +22,5 @@ class Session:
     def __repr__(self):
         return f'Session(access_token={self.access_token})'
 
-    def avl_events(self):
-        response = self.wialon_api.avl_evts()
-        return response
-
-    def create_unit(self, params: dict | None) -> dict | None:
-        if params is None:
-            return None
-        response = self.wialon_api.core_create_unit(**params)
-        return response
-
-    def create_user(self, params: dict | None) -> dict | None:
-        if params is None:
-            return None
-        response = self.wialon_api.core_create_user(**params)
-        return response
-
-    # Does not provide user ID, only billing information for user
-    def get_account_data(self, params: dict | None) -> dict | None:
-        if params is None:
-            return None
-        response = self.wialon_api.core_get_account_data(**params)
-        return response
-
-    def get_items_access(self, params: dict | None) -> dict | None:
-        if params is None:
-            return None
-        response = self.wialon_api.user_get_items_access(**params)
-        return response
-
-    def get_vin_info(self, params: dict | None) -> dict | None:
-        if params is None:
-            return None
-        response = self.wialon_api.unit_get_vin_info(**params)
-        return response
-
-    def search_items(self, params: dict | None) -> dict | None:
-        if params is None:
-            return None
-        response = self.wialon_api.core_search_items(**params)
-        return response
-
-    def send_sms(self, params: dict | None) -> dict | None:
-        if params is None:
-            return None
-        response = self.wialon_api.user_send_sms(**params)
-        return response
-
-    def set_session_property(self, params: dict | None) -> dict | None:
-        if params is None:
-            return None
-        response = self.wialon_api.core_set_session_property(**params)
-        return response
+    def call(self, method: str | None, params: dict | None) -> dict | None:
+        return self.wialon_api.call(method, params)
