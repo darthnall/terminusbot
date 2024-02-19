@@ -21,10 +21,42 @@ def create_app(wialon_token: str | None):
             try:
                 with Session(token=wialon_token) as session:
                     keyword = request.form.get('search', '')
-                    response = session.search_items(params=auth.query.generate(keyword))
+                    print(keyword)
+                    category = request.form.get('searchType', '')
+                    print(category)
+                    response = session.search_items(params=auth.query.generate(keyword, category))
                     return render_template('search-results.html', response=response)
             except WialonError as e:
                 return(f'Error code {e._code}, msg: {e._text}')
+        else:
+            return render_template('index.html')
+
+    @app.route("/api/create-unit", methods=['GET', 'POST'])
+    def create_unit():
+        if request.method == 'GET':
+            try:
+                with Session(token=wialon_token) as session:
+                    units = session.search_items(params=auth.query.generate('*', 'unit'))
+                    return render_template('create-unit.html', units=units)
+            except WialonError as e:
+                return(f'Error code {e._code}, msg: {e._text}')
+        elif request.method == 'POST':
+            try:
+                with Session(token=wialon_token) as session:
+                    name = request.form.get('inputName', '')
+                    imei = request.form.get('inputUnit', '')
+                    t1000 = request.form.get('t1000', '')
+                    params = {
+                            "creatorId": int(os.environ['WIALON_HOSTING_CREATOR_ID_DEV']),
+                            "name": name,
+                            "hwTypeId": imei,
+                            "dataFlags": 2
+
+                            }
+                    response = session.create_unit(params=params)
+                    return render_template('create-unit-results.html', response=response)
+            except WialonError as e:
+                return(f'Error code {e._code}, msg: {e._text}, params={params}')
         else:
             return render_template('index.html')
 
@@ -42,10 +74,10 @@ def create_app(wialon_token: str | None):
             try:
                 with Session(token=token) as session:
                     params = {
-                        'creatorId': os.environ['WIALON_HOSTING_CREATOR_ID_DEV'],
+                        'creatorId': int(os.environ['WIALON_HOSTING_CREATOR_ID_DEV']),
                         'name': username,
                         'password': password,
-                        'dataFlags': '1'
+                        'dataFlags': 2
                     }
                     response = session.create_user(params=params)
             except WialonError as e:

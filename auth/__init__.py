@@ -19,13 +19,12 @@ class Session:
             print(f'exc_type: {exc_type}, exc_val: {exc_val}, exc_tb: {exc_tb}')
             return False
         self.wialon_api.core_logout()
-        print('logout successful')
         return True
 
     def __repr__(self):
         return f'Session(access_token={self.access_token})'
 
-    def create_unit(self):
+    def create_unit(self, params: dict | None) -> dict | None:
         if params is None:
             return None
         response = self.wialon_api.core_create_unit(**params)
