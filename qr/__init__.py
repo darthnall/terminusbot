@@ -9,8 +9,9 @@ if __name__ == "__main__":
         border=4,
     )
 
-    qr.add_data('https://hosting.wialon.com/login.html?user=Blake@terminusgps.com')
+    imei = 1234235345
+    qr.add_data(f'localhost:5000/register?imei={imei}')
     qr.make(fit=True)
 
     img = qr.make_image(fill_color="black", back_color="white")
-    img.save("Blake.png")
+    img.save("test.png")
