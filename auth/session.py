@@ -23,42 +23,22 @@ class Session:
     def __repr__(self):
         return f'Session(access_token={self.access_token})'
 
-    def search(self, category: str | None, keyword: str | None) -> dict | None:
+    @property
+    def sid(self) -> str: return self.wialon_api.sid
 
-        valid_categories = ['user']
+    def create_user(self, creds: dict | None) -> dict | None:
 
-        if category not in valid_categories:
-            return None
+        params = {}
 
-        params = {
-            "spec": {
-                "itemsType": category,
-                "propName": "sys_name",
-                "propValueMask": "*",
-                "sortType": "sys_name"
-            },
-            "force": 1,
-            "flags": 1,
-            "from": 0,
-            "to": 0
-        }
-
-        if keyword is not None:
-            params['spec']['propValueMask'] = f'*{keyword}*'
-
-        response = self.wialon_api.core_search_items(**params)
-        return response
-
-    def create_user(self, username: str | None, password: str | None) -> dict | None:
+        email = creds['email']
+        imei = creds['imei']
 
         params = {
             "creatorId": 21438204,
-            "name": username,
-            "password": password,
+            "name": creds['username'],
+            "password": creds['password'],
             "dataFlags": 1
         }
 
-        print(params)
-
-        response = self.wialon_api.core_create_user(params)
+        response = self.wialon_api.core_create_user(**params)
         return response

@@ -1,16 +1,33 @@
 import string
 import random
 
-def create_user(firstname: str, lastname: str, email: str) -> dict | None:
-    username = f'{firstname.lower()}.{lastname.lower()}'
+def gen_creds(data: dict) -> tuple | None:
+
+    username = f'{data["firstName"].lower()}.{data["lastName"].lower()}'
 
     while len(username) < 8:
         username += random.choice(string.digits)
 
-    password = gen_pass(length=8)
-    # Create the user in Wialon
-    # Email user their credentials
-    return True
+    password = gen_pass(length=12)
+
+    creds = {
+             'username': username,
+             'password': password,
+             'email': data["email"],
+             'imei': data["num"]
+             }
+
+    return creds
+
+def validate(data: dict | None) -> dict | None:
+    if data is None:
+        return None
+    else:
+        for key, value in data.items():
+            if value == '':
+                return None
+        print(data)
+        return data
 
 def gen_pass(length: int) -> str | None:
     password_list = []

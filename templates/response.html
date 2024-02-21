@@ -1,29 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>response</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-        <style>
-            div {
-                margin: 2em;
-            }
-        </style>
-    </head>
-    <body>
-        <div>
-        {% if response %}
-              <h3>Results:</h3>
-            {% for key, value in response.items() %}
+{% extends 'index.html' %}
+{% block content %}
+<div>
+    {% if response %}
+      <h3>Results:</h3>
+        {% for key, value in response.items() %}
             <p><strong>Key</strong>: {{ key }} <strong>Value</strong>: {{ value }}</p>
-            {% endfor %}
-        {% else %}
-          <h3>Bad response</h3>
-          <p>Bad response</p>
-        {% endif %}
-        <a class="btn" href="/api">Go back</a>
-        </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-    </body>
-</html>
+        {% endfor %}
+    {% else %}
+      <h3>Bad response</h3>
+      <p>Bad response</p>
+    {% endif %}
+    <a class="btn" href="/">Go back</a>
+</div>
+{% endblock %}
