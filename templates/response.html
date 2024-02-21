@@ -1,0 +1,21 @@
+{% extends 'index.html' %}
+{% block content %}
+<div>
+    {% if response %}
+      <h3>Results:</h3>
+        {% for key, value in response.items() %}
+            {% if type(value) == dict %}
+                <h2><strong>{{ key }}</strong></h2>
+                <p>{{ value }}</p>
+            {% else %}
+                <h2><strong>{{ key }}:</strong></h2>
+                <p>{{ value }}</p>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+      <h3>Bad response</h3>
+      <p>Bad response</p>
+    {% endif %}
+    <a class="btn" href="/">Go back</a>
+</div>
+{% endblock %}
