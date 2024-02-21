@@ -29,8 +29,7 @@ def create_app(wialon_token: str | None):
             return render_template('register.html', title='Registration')
         else:
             # Collect form data
-            data = validate(request.form.to_dict())
-            print(data)
+            data = request.form
             # Pass form data to Wialon API
             try:
                 with Session(token=token) as session:

@@ -28,9 +28,9 @@ class Session:
 
     def create_user(self, creds: dict | None) -> dict | None:
 
-        params = {}
-
+        # TODO: Email user credentials to user
         email = creds['email']
+        # TODO: Assign resource to new user
         imei = creds['imei']
 
         params = {
@@ -40,5 +40,5 @@ class Session:
             "dataFlags": 1
         }
 
-        response = self.wialon_api.core_create_user(**params)
+        response = self.wialon_api.call('core_create_user', **params)
         return response

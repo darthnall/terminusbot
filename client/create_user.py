@@ -1,9 +1,15 @@
 import string
 import random
 
-def gen_creds(data: dict) -> tuple | None:
+def gen_creds(data) -> dict | None:
 
-    username = f'{data["firstName"].lower()}.{data["lastName"].lower()}'
+    data = {t[0]: t[1] for t in data.items()}
+    print(data)
+
+    first = data['firstName'].lower()
+    last = data['lastName'].lower()
+
+    username = first + '.' + last
 
     while len(username) < 8:
         username += random.choice(string.digits)
@@ -36,6 +42,3 @@ def gen_pass(length: int) -> str | None:
     password_list += random.choice(list(string.ascii_uppercase))
     password_list += random.choice(['!', '@', '#', '$'])
     return ''.join(password_list)
-
-if __name__ == "__main__":
-    print(create_user(firstname='Blake',lastname='Nall',email='blakenall@proton.me'))

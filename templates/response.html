@@ -4,7 +4,13 @@
     {% if response %}
       <h3>Results:</h3>
         {% for key, value in response.items() %}
-            <p><strong>Key</strong>: {{ key }} <strong>Value</strong>: {{ value }}</p>
+            {% if type(value) == dict %}
+                <h2><strong>{{ key }}</strong></h2>
+                <p>{{ value }}</p>
+            {% else %}
+                <h2><strong>{{ key }}:</strong></h2>
+                <p>{{ value }}</p>
+            {% endif %}
         {% endfor %}
     {% else %}
       <h3>Bad response</h3>
