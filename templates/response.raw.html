@@ -4,10 +4,6 @@
     {% if response %}
         <h3>Results:</h3>
         <p>Raw: {{ response }}</p>
-        {% for key, value in response.items() %}
-            <h2><strong>{{ key }}:</strong></h2>
-            <p>{{ value }}</p>
-        {% endfor %}
     {% else %}
         <h3>Bad response</h3>
         <p>Bad response</p>

@@ -34,11 +34,3 @@ def validate(data: dict | None) -> dict | None:
                 return None
         print(data)
         return data
-
-def gen_pass(length: int) -> str | None:
-    password_list = []
-    for i in range(length-2):
-        password_list += random.choice(list(string.ascii_lowercase))
-    password_list += random.choice(list(string.ascii_uppercase))
-    password_list += random.choice(['!', '@', '#', '$'])
-    return ''.join(password_list)

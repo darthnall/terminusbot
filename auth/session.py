@@ -10,7 +10,6 @@ class Session:
     def __enter__(self):
         login = self.wialon_api.token_login(token=self.token)
         self.wialon_api.sid = login['eid']
-        print(f'Logged in with session id: {login["eid"]}')
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -26,6 +25,17 @@ class Session:
     @property
     def sid(self) -> str: return self.wialon_api.sid
 
+    def token_list(self) -> dict: return self.wialon_api.token_list({"userId":27881459})
+
+    def set_sms(self, user_id: str) -> dict:
+        params = {
+            "userId":user_id,
+            "flags":0x20,
+            "flagsMask":0x00
+        }
+        response = self.wialon_api.user_update_user_flags(**params)
+        return response
+
     def create_user(self, creds: dict | None) -> dict | None:
 
         # TODO: Email user credentials to user
@@ -34,11 +44,13 @@ class Session:
         imei = creds['imei']
 
         params = {
-            "creatorId": 21438204,
-            "name": creds['username'],
-            "password": creds['password'],
-            "dataFlags": 1
+            "creatorId":27881459, # Terminus-1000's user id
+            "name":creds['username'], # Generated username
+            "password":creds['password'], # Generated password
+            "dataFlags":1 # Default flags
         }
 
-        response = self.wialon_api.call('core_create_user', **params)
+        print(params)
+
+        response = self.wialon_api.core_create_user(**params)
         return response
