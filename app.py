@@ -1,6 +1,7 @@
 # Wialon API session
 from auth import Session
 # Generate credentials for Wialon API
+from client import User
 from client import gen_creds
 from client import validate
 # Flask webapp for handling requests
@@ -32,8 +33,16 @@ def create_app(token: str | None, debug_mode_enabled: bool = True):
             # Pass form data to Wialon API
             try:
                 with Session(token=token) as session:
-                    creds = gen_creds(data=data)
-                    response = session.create_user(creds=creds)
+                    creds = {
+                             'username': 'blake.nall',
+                             'password': '123',
+                             'email': 'blakenall@proton.me',
+                             'phoneNumber': '17133049421',
+                             'imei': 123
+                             }
+                    user = User(creds=creds, session=session)
+                    print(user.email)
+                    return render_template('response.html', response=creds, title='Response', redirect='register')
             except WialonError as e:
                 return(f'Error code {e._code}, msg: {e._text}')
 
