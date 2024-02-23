@@ -4,7 +4,7 @@
     <form action="/register" method="post" class="row g-3 needs-validation" novalidate>
         <div class="col-md-4">
             <label for="firstName" class="form-label">First Name</label>
-            <input type="text" class="form-control" name="firstName" id="firstName" placeholder="First" required>
+            <input type="text" class="form-control" name="firstName" id="firstName" placeholder="First" oninput="updateAssetName()" required>
             <div class="valid-feedback">
                 Looks good!
             </div>
@@ -33,8 +33,28 @@
             </div>
         </div>
         <div class="col-md-4">
-            <label for="num" class="form-label">IMEI number</label>
-            <input type="text" class="form-control" name="num" id="num" placeholder="IMEI #" required>
+            <label for="phoneNumber" class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" name="phoneNumber" id="phoneNumber" placeholder="Phone #" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
+            <div class="valid-feedback">
+                Looks good!
+            </div>
+            <div class="invalid-feedback">
+                Please enter a valid phone number.
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label for="assetName" class="form-label">Asset Name</label>
+            <input type="text" class="form-control" name="assetName" id="assetName" placeholder="Asset Name" oninput="disableAutoUpdate(event)">
+            <div class="valid-feedback">
+                Looks good!
+            </div>
+            <div class="invalid-feedback">
+                Please enter a valid asset name.
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label for="imei" class="form-label">IMEI Number</label>
+            <input type="number" class="form-control" name="imei" id="imei" placeholder="IMEI #" required>
             <div class="valid-feedback">
                 Looks good!
             </div>
@@ -47,4 +67,20 @@
         </div>
     </form>
 </div>
+<script>
+  const defaultFormat = "'s Ride"
+  let autoUpdateEnabled = true;
+  function updateAssetName() {
+    let firstNameValue = document.getElementById('firstName').value;
+
+    if (autoUpdateEnabled) {
+      document.getElementById('assetName').value = firstNameValue + defaultFormat;
+    }
+  }
+
+  function disableAutoUpdate(event) {
+      if (event.isTrusted) { autoUpdateEnabled = false; }
+  }
+
+</script>
 {% endblock %}

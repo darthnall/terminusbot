@@ -37,7 +37,6 @@ def gen_password(length: int) -> str | bool:
 def gen_creds(data) -> dict | None:
 
     data = {t[0]: t[1] for t in data.items()}
-    print(data)
 
     username = gen_username(data["firstName"], data["lastName"])
     password = gen_password(length=12)
@@ -46,7 +45,10 @@ def gen_creds(data) -> dict | None:
              'username': username,
              'password': password,
              'email': data["email"],
-             'imei': data["num"]
+             'imei': data["imei"],
+             'phoneNumber': data["phoneNumber"],
+             'userId': None
              }
+
 
     return creds

@@ -2,8 +2,6 @@
 from auth import Session
 # Generate credentials for Wialon API
 from client import User
-from client import gen_creds
-from client import validate
 # Flask webapp for handling requests
 from flask import Flask
 from flask import render_template
