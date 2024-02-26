@@ -3,7 +3,7 @@ from wialon import WialonError
 from vininfo import Vin
 
 class Unit(Session):
-    def __init__(self, unit_id, user, session):
+    def __init__(self, unit_id, session):
         # Set session
         self.session = session
 
@@ -12,16 +12,21 @@ class Unit(Session):
         self._name = user.creds['assetName']
         self._vin = None
 
+    def __repr__(self) -> str: return f"Unit({self.id}, {self.name}, {self.vin})"
+
     @property
     def id(self) -> int: return self._id
+
     @property
     def name(self) -> str: return self._name
-    @property
-    def vin(self) -> str: return self._vin
 
-    def assign(self) -> dict | bool:
+    @property
+    def vin(self): return self._vin
+
+    def assign(self, user) -> dict | bool:
+        # Create unit
         params = {
-            "creatorId": self.user.id,
+            "creatorId": user.id,
             "name": self.name,
             "hwTypeId": self.id,
             "dataFlags": 1
@@ -29,8 +34,8 @@ class Unit(Session):
         response = self.session.wialon_api.core_create_unit(**params)
         return response
 
-    def set_vin(self, _vin: str) -> bool:
-        self.vin = Vin(_vin)
+    def set_vin(self, vin: str | None) -> bool:
+        self._vin = Vin(vin)
         if self.vin.verify_checksum():
             return True
         else:

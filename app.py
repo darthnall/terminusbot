@@ -36,17 +36,17 @@ def create_app(token: str | None, debug_mode_enabled: bool = True):
                 with Session(token=token) as session:
                     # Pass form data to new user object
                     user = User(data=data, session=session)
+                    unit = Unit(data['imei'], session=session)
                     # Call Wialon API with form data
-                    response = user.create()
-                    # Pass form data to new unit object
-                    unit = Unit(data['imei'], user=user, session=session)
-                    # Call Wialon API with form data
-                    print(unit.set_vin('JTHBA30G065155212'))
-                    print(unit)
+                    # TODO: Check if user exists
+                    user.create()
+                    unit.assign(user=user)
+                    # Check VIN validity
+                    if unit.set_vin(data['vin']):
             except WialonError as e:
                 return(f'Error code {e._code}, msg: {e._text}')
 
-            return render_template('response.html', response=response, title='Response', redirect='register')
+            return render_template('response.raw.html', response=response, title='Response', redirect='register')
 
     if debug_mode_enabled:
         @app.route("/token", methods=['GET'])

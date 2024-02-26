@@ -1,10 +1,6 @@
 import string
 import random
 
-def gen_username(email: str) -> str:
-    username = email.split('@')
-    return username[0]
-
 def gen_password(length: int) -> str | bool:
     """
     Password requirements:
