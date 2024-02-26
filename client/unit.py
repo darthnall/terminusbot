@@ -1,21 +1,27 @@
 from . import Session
 from wialon import WialonError
+from vininfo import Vin
 
 class Unit(Session):
-    def __init__(self, session, unit_id):
+    def __init__(self, unit_id, user, session):
+        # Set session
         self.session = session
+
+        # Define properties
         self._id = unit_id
-        self.name = f'Unit-{self._id}'
+        self._name = user.creds['assetName']
+        self._vin = None
 
     @property
     def id(self) -> int: return self._id
-
     @property
-    def name(self) -> str: return self.name
+    def name(self) -> str: return self._name
+    @property
+    def vin(self) -> str: return self._vin
 
-    def assign(self, user) -> dict | bool:
+    def assign(self) -> dict | bool:
         params = {
-            "creatorId": user.id,
+            "creatorId": self.user.id,
             "name": self.name,
             "hwTypeId": self.id,
             "dataFlags": 1
@@ -23,23 +29,9 @@ class Unit(Session):
         response = self.session.wialon_api.core_create_unit(**params)
         return response
 
-    def unit_available(self) -> bool:
-        params = {
-            "spec": {
-                "itemsType": "user",
-                "propName": "sys_name",
-                "propValueMask": f"*{self._id}*",
-                "sortType": "sys_name"
-            },
-            "force": 1,
-            "flags": 1,
-            "from": 0,
-            "to": 0
-        }
-        try:
-            response = self.session.wialon_api.core_search_items(**params)
-            self._id = response['item']
-        except WialonError as e:
-            print(f'Error code {e._code}, msg: {e._text}')
+    def set_vin(self, _vin: str) -> bool:
+        self.vin = Vin(_vin)
+        if self.vin.verify_checksum():
+            return True
+        else:
             return False
-        return True

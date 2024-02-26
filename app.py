@@ -34,12 +34,15 @@ def create_app(token: str | None, debug_mode_enabled: bool = True):
             data = request.form
             try:
                 with Session(token=token) as session:
+                    # Pass form data to new user object
                     user = User(data=data, session=session)
+                    # Call Wialon API with form data
                     response = user.create()
-                    unit = Unit(session=session, id=data['imei'])
-                    unit.add()
+                    # Pass form data to new unit object
+                    unit = Unit(data['imei'], user=user, session=session)
+                    # Call Wialon API with form data
+                    print(unit.set_vin('JTHBA30G065155212'))
                     print(unit)
-                    pass
             except WialonError as e:
                 return(f'Error code {e._code}, msg: {e._text}')
 

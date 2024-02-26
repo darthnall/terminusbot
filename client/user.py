@@ -1,5 +1,4 @@
 from auth import Session
-from vininfo import Vin
 from . import gen_creds
 
 
@@ -43,11 +42,6 @@ class User(Session):
 
     def email_creds(self):
         pass
-
-    def get_vin_info(self, vin: int) -> dict:
-        info = Vin(vin)
-        annotated_info = info.annotate()
-        return annotated_info
 
     def assign_phone(self) -> bool:
         params = { "itemId": self.id, "phoneNumber": self.phone }
