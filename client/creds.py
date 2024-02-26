@@ -1,15 +1,9 @@
 import string
 import random
 
-def gen_username(first_name: str, last_name: str) -> str:
-    first, last = first_name.lower(), last_name.lower()
-
-    username = first + '.' + last
-
-    while len(username) < 8:
-        username += random.choice(string.digits)
-
-    return username
+def gen_username(email: str) -> str:
+    username = email.split('@')
+    return username[0]
 
 def gen_password(length: int) -> str | bool:
     """
@@ -23,10 +17,6 @@ def gen_password(length: int) -> str | bool:
     """
     password_list = []
 
-    if length < 8:
-        # TODO: Handle false return
-        return False
-
     for i in range(length-3):
         password_list += random.choice(list(string.ascii_lowercase))
     password_list += random.choice(list(string.ascii_uppercase))
@@ -38,17 +28,13 @@ def gen_creds(data) -> dict | None:
 
     data = {t[0]: t[1] for t in data.items()}
 
-    username = gen_username(data["firstName"], data["lastName"])
+    username = data['email']
     password = gen_password(length=12)
 
     creds = {
-             'username': username,
-             'password': password,
-             'email': data["email"],
-             'imei': data["imei"],
-             'phoneNumber': data["phoneNumber"],
-             'userId': None
-             }
+         'username': username,
+         'password': password,
+    }
 
-
+    creds.update(data)
     return creds

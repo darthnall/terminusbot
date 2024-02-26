@@ -54,7 +54,11 @@
         </div>
         <div class="col-md-4">
             <label for="imei" class="form-label">IMEI Number</label>
-            <input type="number" class="form-control" name="imei" id="imei" placeholder="IMEI #" required>
+            {% if imei %}
+                <input type="number" class="form-control" name="imei" id="imei" placeholder="IMEI #" value="{{ imei }}" required>
+            {% else %}
+                <input type="number" class="form-control" name="imei" id="imei" placeholder="IMEI #" required>
+            {% endif %}
             <div class="valid-feedback">
                 Looks good!
             </div>
@@ -62,14 +66,22 @@
                 Please enter a valid IMEI number.
             </div>
         </div>
+        <div id="optionalFields" class="d-none">
+            <div class="col-md-4">
+                <label for="vin" class="form-label">VIN Number</label>
+                <input type="text" class="form-control" name="vin" id="vin" placeholder="Vin #">
+            </div>
+        </div>
         <div class="col-md-4">
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn btn-primary" id="register">Register</button>
+            <button type="button" class="btn btn-secondary" id="toggle" onclick="toggleOptionalFields()">Show Options</button>
         </div>
     </form>
 </div>
 <script>
   const defaultFormat = "'s Ride"
   let autoUpdateEnabled = true;
+  let toggleButton = document.getElementById('toggle');
   function updateAssetName() {
     let firstNameValue = document.getElementById('firstName').value;
 
@@ -80,6 +92,17 @@
 
   function disableAutoUpdate(event) {
       if (event.isTrusted) { autoUpdateEnabled = false; }
+  }
+
+  function toggleOptionalFields() {
+    let optionalFields = document.getElementById('optionalFields');
+      if (optionalFields.classList.contains('d-none')) {
+        toggleButton.innerText = 'Hide Options';
+        optionalFields.classList.toggle('d-none');
+    } else {
+        toggleButton.innerText = 'Show Options';
+        optionalFields.classList.toggle('d-none');
+    }
   }
 
 </script>

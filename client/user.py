@@ -1,9 +1,11 @@
 from auth import Session
+from vininfo import Vin
 from . import gen_creds
 
+
 class User(Session):
-    def __init__(self, data: dict, token: str):
-        super().__init__(token=token)
+    def __init__(self, data: dict, session):
+        self.session = session
         self.creds = gen_creds(data)
 
     def __repr__(self) -> str: return f'User credentials: {self.creds}'
@@ -24,8 +26,8 @@ class User(Session):
             "password":self.creds['password'], # Generated password
             "dataFlags":1 # Default flags
         }
-        response = self.wialon_api.core_create_user(**params)
-        # self.creds['userId'] = response['item']['UNKNOWN']
+        response = self.session.wialon_api.core_create_user(**params)
+        self.creds['userId'] = response['item']['id']
         return response
 
     def set_default_flags(self) -> bool:
@@ -34,22 +36,22 @@ class User(Session):
             "flags": 0x02,
             "flagsMask": 0x00
         }
-
-        response = self.wialon_api.user_update_user_flags(**params)
-
-        try:
-            if response['fl']:
-                return True
-        except KeyError:
-            return False
+        response = self.session.wialon_api.user_update_user_flags(**params)
+        if response.status_code == 200:
+            return True
         return False
 
     def email_creds(self):
         pass
 
+    def get_vin_info(self, vin: int) -> dict:
+        info = Vin(vin)
+        annotated_info = info.annotate()
+        return annotated_info
+
     def assign_phone(self) -> bool:
         params = { "itemId": self.id, "phoneNumber": self.phone }
-        # response = wialon_api.unit_update_phone(**params)
+        response = self.session.wialon_api.unit_update_phone(**params)
         if print(f'Assigned phone number {self.phone} to user'):
             return True
         return False
