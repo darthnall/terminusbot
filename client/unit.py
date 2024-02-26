@@ -3,13 +3,13 @@ from wialon import WialonError
 from vininfo import Vin
 
 class Unit(Session):
-    def __init__(self, unit_id, session):
+    def __init__(self, data, session):
         # Set session
         self.session = session
 
         # Define properties
-        self._id = unit_id
-        self._name = user.creds['assetName']
+        self._id = None
+        self._name = data['assetName']
         self._vin = None
 
     def __repr__(self) -> str: return f"Unit({self.id}, {self.name}, {self.vin})"
