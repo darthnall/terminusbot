@@ -23,7 +23,7 @@ def create_app(token: str | None, debug_mode_enabled: bool = True):
 
     # Create /register route for Wialon API requests
     @app.route("/register", methods=['GET', 'POST'])
-    def index():
+    def register():
         if request.method == 'GET':
             try:
                 imei = request.args.get('imei')
