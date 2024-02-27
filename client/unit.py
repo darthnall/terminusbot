@@ -23,24 +23,13 @@ class Unit(Session):
     @property
     def vin(self): return self._vin
 
-    def hw_type(self):
-        params = {
-            "filterType": "type",
-            "filterValue": "name",
-            "includeType": True,
-            "ignoreRename": True
-        }
-
-        response = self.session.wialon_api.core_get_hw_types(**params)
-        return response
-
     def assign(self, user) -> dict | bool:
         if self._id is None:
             # Create unit
             params = {
                 "creatorId": user.id,
                 "name": self.name,
-                "hwTypeId": "",
+                "hwTypeId": "tracker",
                 "dataFlags": 1
             }
 
