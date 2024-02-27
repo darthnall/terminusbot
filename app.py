@@ -34,12 +34,14 @@ def create_app(token: str | None, debug_mode_enabled: bool = True):
             data = request.form
             try:
                 with Session(token=token) as session:
-                    # Pass form data to new user object
                     user = User(data=data, session=session)
+                    user.create()
+
                     unit = Unit(data=data, session=session)
-                    response = unit.hw_type()
-                    #unit.assign(user=user)
-                    # Check VIN validity
+                    response = unit.assign(user_id=user.id)
+
+                    if data['vin']:
+                        unit.set_vin(data['vin'])
             except WialonError as e:
                 return(f'Error code {e._code}, msg: {e._text}')
 
