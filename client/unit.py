@@ -23,16 +23,36 @@ class Unit(Session):
     @property
     def vin(self): return self._vin
 
-    def assign(self, user) -> dict | bool:
-        # Create unit
+    def hw_type(self):
         params = {
-            "creatorId": user.id,
-            "name": self.name,
-            "hwTypeId": self.id,
-            "dataFlags": 1
+            "filterType": "type",
+            "filterValue": "name",
+            "includeType": True,
+            "ignoreRename": True
         }
-        response = self.session.wialon_api.core_create_unit(**params)
+
+        response = self.session.wialon_api.core_get_hw_types(**params)
         return response
+
+    def assign(self, user) -> dict | bool:
+        if self._id is None:
+            # Create unit
+            params = {
+                "creatorId": user.id,
+                "name": self.name,
+                "hwTypeId": "",
+                "dataFlags": 1
+            }
+
+            response = self.session.wialon_api.core_create_unit(**params)
+            self._id = response['item']['id']
+
+            if self.validate():
+                return response
+            else:
+                return False
+        else:
+            return True
 
     def set_vin(self, vin: str | None) -> bool:
         self._vin = Vin(vin)
@@ -40,3 +60,22 @@ class Unit(Session):
             return True
         else:
             return False
+
+    def validate(self) -> bool:
+        params = {
+            "spec": {
+                "itemsType": "avl_unit",
+                "propName": "name",
+                "propValueMask": f"*{self.name}*",
+                "sortType": "sys_name",
+                "propType": ""
+            },
+            "force": 1,
+            "flags": 1,
+            "from": 0,
+            "to": 0
+        }
+        response = self.session.wialon_api.core_search_items(**params)
+        if response:
+            return True
+        return False

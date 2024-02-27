@@ -37,14 +37,16 @@ def create_app(token: str | None, debug_mode_enabled: bool = True):
                     # Pass form data to new user object
                     user = User(data=data, session=session)
                     unit = Unit(data=data, session=session)
-                    response = user.create()
-                    user.email_creds()
+                    response = unit.hw_type()
                     #unit.assign(user=user)
                     # Check VIN validity
             except WialonError as e:
                 return(f'Error code {e._code}, msg: {e._text}')
 
-            return render_template('response.html', response=response, title='Response', redirect='register')
+            if type(response) == list:
+                return render_template('response.raw.html', response=response, title='Response', redirect='register')
+            else:
+                return render_template('response.html', response=response, title='Response', redirect='register')
 
     if debug_mode_enabled:
         @app.route("/token", methods=['GET'])
