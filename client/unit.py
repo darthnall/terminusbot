@@ -47,14 +47,20 @@ class Unit(Session):
             33554432,  # Register events
             268435456,  # View service intervals
             # 0x0400000000, # View commands
-            # 0x8000000000  # Use unit in jobs, notifications, routes, retranslators
+            # 0x8000000000,  # Use unit in jobs, notifications, routes, retranslators
         ]
 
         params = {"userId": user_id, "itemId": self.id, "accessMask": sum(flags)}
 
         response = self.session.wialon_api.user_update_item_access(**params)
+        print(response)
+        if self.rename():
+            print('Unit renamed')
         return response
 
-    def set_vin(self, vin: str | None) -> bool:
-        self._vin = Vin(vin)
-        return self.vin.verify_checksum()
+    def rename(self) -> bool:
+        params = {"itemId": self.id, "name": self.name}
+        response = self.session.wialon_api.item_update_name(**params)
+        if response["nm"] == self.name:
+            return True
+        return False

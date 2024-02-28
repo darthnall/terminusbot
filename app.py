@@ -28,15 +28,14 @@ def create_app(token: str | None):
                 unit = Unit(data=data, session=session)
                 response = unit.assign(user_id=user.id)
 
-                if vin := data["vin"] is not None:
-                    unit.set_vin(vin)
+                print(response)
 
-            if isinstance(response, ImmutableMultiDict):
-                page = "response.raw.html"
+                if not isinstance(response, dict):
+                    page = "response.raw.html"
 
-            return render_template(
-                page, response=response, title="Response", redirect="register"
-            )
+                return render_template(
+                    page, response=response, title="Response", redirect="register"
+                )
 
     return app
 
