@@ -56,7 +56,4 @@ class Unit(Session):
 
     def set_vin(self, vin: str | None) -> bool:
         self._vin = Vin(vin)
-        if self.vin.verify_checksum():
-            return True
-        else:
-            return False
+        return self.vin.verify_checksum()

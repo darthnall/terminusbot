@@ -1,5 +1,6 @@
 from . import Session
 
+
 class Search(Session):
     def __init__(self, session: Session):
         self.session = session
@@ -15,8 +16,8 @@ class Search(Session):
             "force": 1,
             "flags": 1,
             "from": 0,
-            "to": 0
+            "to": 0,
         }
 
         response = self.session.wialon_api.core_search_items(**params)
-        return response['items'][0]['id']
+        return response["items"][0]["id"]

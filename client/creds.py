@@ -1,5 +1,6 @@
-import string
 import random
+import string
+
 
 def gen_password(length: int) -> str:
     """
@@ -11,25 +12,26 @@ def gen_password(length: int) -> str:
         - Different from username
         - Minumum 8 charcters
     """
-    password_list = []
+    password_list: list = []
 
-    for i in range(length-3):
+    for i in range(length - 3):
         password_list += random.choice(list(string.ascii_lowercase))
     password_list += random.choice(list(string.ascii_uppercase))
-    password_list += random.choice(['!', '@', '#', '$'])
+    password_list += random.choice(["!", "@", "#", "$"])
     password_list += str(random.choice(range(1, 9, 1)))
-    return ''.join(password_list)
+    return "".join(password_list)
 
-def gen_creds(data) -> dict | None:
+
+def gen_creds(data: dict) -> dict | None:
 
     data = {t[0]: t[1] for t in data.items()}
 
-    username = data['email']
-    password = gen_password(length=12)
+    username: str = data["email"]
+    password: str = gen_password(length=12)
 
-    creds = {
-         'username': username,
-         'password': password,
+    creds: dict = {
+        "username": username,
+        "password": password,
     }
 
     creds.update(data)
