@@ -12,7 +12,7 @@ class Unit(Session):
         search = Search(self.session)
         self._imei = data['imei']
         if search.imei_to_id(self._imei):
-            self._id = search.imei_to_id(self.imei)
+            self._id = search.imei_to_id(self._imei)
         else:
             self._id = None
 
@@ -25,7 +25,7 @@ class Unit(Session):
     def imei(self) -> int: return self._imei
 
     @property
-    def id(self) -> int: return self._id
+    def id(self) -> int | None: return self._id
 
     @property
     def name(self) -> str: return self._name
@@ -45,12 +45,13 @@ class Unit(Session):
             #0x0400000000, # View commands
             #0x8000000000  # Use unit in jobs, notifications, routes, retranslators
         ]
+
         params = {
             "userId": user_id,
             "itemId": self.id,
             "accessMask": sum(flags)
         }
-        print(f'unit.assign params: {params}')
+
         response = self.session.wialon_api.user_update_item_access(**params)
         return response
 

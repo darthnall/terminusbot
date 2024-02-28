@@ -5,7 +5,7 @@ class Search(Session):
     def __init__(self, session: Session):
         self.session = session
 
-    def imei_to_id(self, imei: str) -> str | None:
+    def imei_to_id(self, imei: str) -> int | None:
         params = {
             "spec": {
                 "itemsType": "avl_unit",
@@ -20,4 +20,4 @@ class Search(Session):
         }
 
         response = self.session.wialon_api.core_search_items(**params)
-        return response["items"][0]["id"]
+        return int(response["items"][0]["id"])
