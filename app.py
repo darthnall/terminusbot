@@ -50,13 +50,6 @@ def create_app(token: str | None, debug_mode_enabled: bool = True):
             else:
                 return render_template('response.html', response=response, title='Response', redirect='register')
 
-    if debug_mode_enabled:
-        @app.route("/token", methods=['GET'])
-        def token_list():
-            with Session(token=token) as session:
-                response = session.token_list
-                return render_template('response.raw.html', response=response, title='Tokens', redirect='token')
-
     return app
 
 if __name__ == "__main__":

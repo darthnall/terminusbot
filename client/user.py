@@ -3,7 +3,7 @@ from . import gen_creds
 
 
 class User(Session):
-    def __init__(self, data: dict, session):
+    def __init__(self, data: dict, session: Session):
         self.session = session
         self.creds = gen_creds(data)
 
@@ -48,7 +48,7 @@ class User(Session):
 
         return response
 
-    def set_creator_perms(self) -> bool:
+    def set_creator_perms(self) -> None:
         flags = [
             0x0001, # View item and basic properties
             0x0002, # View detailed item properties
@@ -71,12 +71,9 @@ class User(Session):
             "itemId": self.id,
             "accessMask": sum(flags)
         }
-        response = self.session.wialon_api.user_update_item_access(**params)
-        if response is None:
-            return True
-        return False
+        self.session.wialon_api.user_update_item_access(**params)
 
-    def set_user_perms(self, unit_id: str) -> bool:
+    def set_user_perms(self, unit_id: str) -> None:
         flags = [
             0x0001, # View item and basic properties
             0x0002, # View detailed item properties
@@ -91,30 +88,20 @@ class User(Session):
             "itemId": unit_id,
             "accessMask": sum(flags)
         }
-        response = self.session.wialon_api.user_update_user_flags(**params)
-        if response is None:
-            return True
-        return False
+        self.session.wialon_api.user_update_user_flags(**params)
 
-    def set_default_flags(self) -> bool:
+    def set_default_flags(self) -> None:
         params = {
             "userId": self.id,
             "flags": 0x02,
             "flagsMask": 0x00
         }
-        response = self.session.wialon_api.user_update_user_flags(**params)
-        if response:
-            return True
-        return False
+        self.session.wialon_api.user_update_user_flags(**params)
 
-    def email_creds(self) -> bool:
+    def email_creds(self) -> None:
         # TODO: Email credentials to user
         pass
 
-    def assign_phone(self) -> bool:
+    def assign_phone(self) -> None:
         params = { "itemId": self.id, "phoneNumber": self.phone }
-        response = self.session.wialon_api.unit_update_phone(**params)
-        if response:
-            print(f'Assigned phone number {self.phone} to user')
-            return True
-        return False
+        self.session.wialon_api.unit_update_phone(**params)

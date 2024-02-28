@@ -1,7 +1,7 @@
 from . import Session
 
 class Search(Session):
-    def __init__(self, session):
+    def __init__(self, session: Session):
         self.session = session
 
     def imei_to_id(self, imei: str) -> str | None:

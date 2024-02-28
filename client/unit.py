@@ -4,7 +4,7 @@ from wialon import WialonError
 from vininfo import Vin
 
 class Unit(Session):
-    def __init__(self, data, session):
+    def __init__(self, data: dict, session: Session):
         # Set session
         self.session = session
 
@@ -15,10 +15,11 @@ class Unit(Session):
             self._id = search.imei_to_id(self.imei)
         else:
             self._id = None
+
         self._name = data['assetName']
         self._vin = None
 
-    def __repr__(self) -> str: return f"Unit({self.id}, {self.name}, {self.vin})"
+    def __repr__(self) -> str: return f"{self = }"
 
     @property
     def imei(self) -> int: return self._imei
@@ -30,9 +31,9 @@ class Unit(Session):
     def name(self) -> str: return self._name
 
     @property
-    def vin(self): return self._vin
+    def vin(self) -> Vin: return self._vin
 
-    def assign(self, user_id: str) -> dict | bool:
+    def assign(self, user_id: str) -> dict:
         flags = [
             1,         # View item and basic properties
             2,         # View detailed item properties

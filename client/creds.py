@@ -1,7 +1,7 @@
 import string
 import random
 
-def gen_password(length: int) -> str | bool:
+def gen_password(length: int) -> str:
     """
     Password requirements:
         - At least one lowercase letter
