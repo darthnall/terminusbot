@@ -1,0 +1,11 @@
+[project]
+name = "terminusgps-wialon"
+version = "0.0.1"
+requires-python = ">=3.12.0"
+readme = "README.md"
+
+description = "Automatically create user credentials and assign products for TerminusGPS clients."
+authors = [
+    { name = "Blake Nall", email = "blake@terminusgps.com" },
+    { name = "Lili Noack", email = "lili@terminusgps.com" },
+]

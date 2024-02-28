@@ -37,14 +37,8 @@ class User(Session):
         response = self.session.wialon_api.core_create_user(**params)
 
         self.creds['userId'] = response['item']['id']
-
-        print('Setting user flags...')
-        if self.set_default_flags():
-            print('User flags set to default')
-
-        print('Setting Terminus-1000 permissions...')
-        if self.set_creator_perms():
-            print('Terminus-1000 permissions set')
+        self.set_default_flags()
+        #self.set_creator_perms()
 
         return response
 
@@ -66,11 +60,13 @@ class User(Session):
             0x4000, # View attached files
             0x8000  # Edit attached files
         ]
+
         params = {
             "userId": 27881459,
             "itemId": self.id,
             "accessMask": sum(flags)
         }
+
         self.session.wialon_api.user_update_item_access(**params)
 
     def set_user_perms(self, unit_id: str) -> None:

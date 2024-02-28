@@ -9,11 +9,9 @@ from client import Unit, User
 from wialon import Wialon, WialonError
 
 
-# Create a Flask app
 def create_app(token: str | None):
     app = Flask(__name__)
 
-    # Create /register route for Wialon API requests
     @app.route("/register", methods=["GET", "POST"])
     def register():
         if request.method == "GET":

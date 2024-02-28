@@ -22,7 +22,7 @@ def gen_password(length: int) -> str:
     return "".join(password_list)
 
 
-def gen_creds(data: dict) -> dict | None:
+def gen_creds(data: dict) -> dict[str, str | int | None]:
 
     data = {t[0]: t[1] for t in data.items()}
 
