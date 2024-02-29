@@ -1,20 +1,20 @@
 {% extends 'index.html' %}
 {% block content %}
-<div>
-    <a class="btn" href="/{{ redirect }}">Go back</a>
-    {% if response %}
-        <h3>Results:</h3>
-        {% for item in response %}
-            <div class="card">
-                <div class="card-body">
-                    <p>{{ item }}</p>
+    <div>
+        <a class="btn" href="/{{ redirect }}">Go back</a>
+        {% if response %}
+            <h3>Results:</h3>
+            {% for item in response %}
+                <div class="card">
+                    <div class="card-body">
+                        <p>{{ item }}</p>
+                    </div>
                 </div>
-            </div>
-        {% endfor %}
-        <p>Raw: {{ response }}</p>
-    {% else %}
-        <h3>Bad response</h3>
-        <p>Bad response</p>
-    {% endif %}
-</div>
+            {% endfor %}
+            <p>Raw: {{ response }}</p>
+        {% else %}
+            <h3>Bad response</h3>
+            <p>Bad response</p>
+        {% endif %}
+    </div>
 {% endblock %}

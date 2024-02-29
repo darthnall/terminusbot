@@ -1,4 +1,5 @@
 from auth import Session
+from . import EmailUser
 from . import gen_creds
 
 
@@ -19,7 +20,7 @@ class User(Session):
     def phone(self) -> str | None: return self.creds['phoneNumber']
 
     @property
-    def id(self) -> int | None: return self.creds['userId']
+    def id(self) -> str | int | None: return self.creds['userId']
 
     @property
     def password(self) -> str: return self.creds['password']
@@ -37,39 +38,13 @@ class User(Session):
         response = self.session.wialon_api.core_create_user(**params)
 
         self.creds['userId'] = response['item']['id']
+        print('Setting user flags')
         self.set_default_flags()
-        #self.set_creator_perms()
+        #self.set_default_perms(unit_id=self.id)
 
         return response
 
-    def set_creator_perms(self) -> None:
-        flags = [
-            0x0001, # View item and basic properties
-            0x0002, # View detailed item properties
-            0x0004, # Manage access to this item
-            0x0010, # Rename item
-            0x0020, # View custom fields
-            0x0040, # Manage custom fields
-            0x0080, # Edit not mentioned properties
-            0x0100, # Change icon
-            0x0200, # Query reports or messages
-            0x0400, # Edit ACL propagated items
-            0x0800, # Manage item log
-            0x1000, # View administrative fields
-            0x2000, # Edit administrative fields
-            0x4000, # View attached files
-            0x8000  # Edit attached files
-        ]
-
-        params = {
-            "userId": 27881459,
-            "itemId": self.id,
-            "accessMask": sum(flags)
-        }
-
-        self.session.wialon_api.user_update_item_access(**params)
-
-    def set_user_perms(self, unit_id: str) -> None:
+    def set_default_perms(self, unit_id: str | int | None) -> None:
         flags = [
             0x0001, # View item and basic properties
             0x0002, # View detailed item properties
@@ -84,7 +59,7 @@ class User(Session):
             "itemId": unit_id,
             "accessMask": sum(flags)
         }
-        self.session.wialon_api.user_update_user_flags(**params)
+        self.session.wialon_api.user_update_item_access(**params)
 
     def set_default_flags(self) -> None:
         params = {
@@ -94,9 +69,9 @@ class User(Session):
         }
         self.session.wialon_api.user_update_user_flags(**params)
 
-    def email_creds(self) -> None:
-        # TODO: Email credentials to user
-        pass
+    def email_creds(self, data: dict) -> bool:
+        email = EmailUser(data=data)
+        return email.send()
 
     def assign_phone(self) -> None:
         params = { "itemId": self.id, "phoneNumber": self.phone }

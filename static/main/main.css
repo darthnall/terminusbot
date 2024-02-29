@@ -1,1 +1,27 @@
-
+label {
+  padding-top: 1em;
+}
+body {
+  background-color: #700000;
+}
+.btn-primary {
+  background-color: #722222;
+  border-color: #ffffff;
+}
+.btn-primary:hover {
+  background-color: #700000;
+  border-color: #ffffff;
+}
+.btn-primary:active {
+  background-color: #700000;
+  border-color: #ffffff;
+}
+.d-grid {
+  background-color: #ffffff;
+  padding: 1em;
+  border-radius: 6px;
+}
+.col-md {
+  padding-left: 1em;
+  padding-right: 1em;
+}
