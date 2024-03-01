@@ -20,19 +20,3 @@ def gen_password(length: int) -> str:
     password_list += random.choice(["!", "@", "#", "$"])
     password_list += str(random.choice(range(1, 9, 1)))
     return "".join(password_list)
-
-
-def gen_creds(data: dict) -> dict[str, str | int | None]:
-
-    data = {t[0]: t[1] for t in data.items()}
-
-    username: str = data["email"]
-    password: str = gen_password(length=12)
-
-    creds: dict = {
-        "username": username,
-        "password": password,
-    }
-
-    creds.update(data)
-    return creds

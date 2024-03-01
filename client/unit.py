@@ -4,26 +4,21 @@ from auth import Search, Session
 from wialon import WialonError
 
 
-class Unit(Session):
-    def __init__(self, data: dict, session: Session):
+class Unit():
+    def __init__(self, creds: dict, session: Session):
         self.session = session
 
         search = Search(self.session)
-        self._imei = data["imei"]
+        self._imei = creds["imei"]
         if search.imei_to_id(self._imei):
             self._id = search.imei_to_id(self._imei)
         else:
             self._id = None
 
-        self._name = data["assetName"]
-        self._vin = None
+        self._name = creds["assetName"]
 
     def __repr__(self) -> str:
         return f"{self = }"
-
-    @property
-    def imei(self) -> int:
-        return self._imei
 
     @property
     def id(self) -> int | None:
@@ -32,10 +27,6 @@ class Unit(Session):
     @property
     def name(self) -> str:
         return self._name
-
-    @property
-    def vin(self) -> Vin:
-        return self._vin
 
     def assign(self, user_id: str) -> dict:
         flags = [

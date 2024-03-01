@@ -1,50 +1,34 @@
 from auth import Session
 from . import EmailUser
-from . import gen_creds
+from . import gen_password
 
 
 class User(Session):
     def __init__(self, data: dict, session: Session):
         self.session = session
-        self.creds = gen_creds(data)
+        self.creds = {key: value for key, value in data}
+        self.creds.update({"password": gen_password(length=12)})
 
     def __repr__(self) -> str: return f'User credentials: {self.creds}'
 
-    @property
-    def email(self) -> str: return self.creds['email']
-
-    @property
-    def username(self) -> str: return self.creds['email']
-
-    @property
-    def phone(self) -> str | None: return self.creds['phoneNumber']
-
-    @property
-    def id(self) -> str | int | None: return self.creds['userId']
-
-    @property
-    def password(self) -> str: return self.creds['password']
-
-    def create(self) -> dict:
-        # TODO: Check if user exists
+    def create(self, name: str, password: str) -> dict:
         params = {
             "creatorId": 27881459, # Terminus-1000's user id
-            "name": self.username, # Generated username
-            "password": self.password, # Generated password
+            "name": name, # User's email
+            "password": password, # Generated password
             "dataFlags": 1 # Default flags
         }
 
-        print('Creating user in Wialon...')
         response = self.session.wialon_api.core_create_user(**params)
 
         self.creds['userId'] = response['item']['id']
-        print('Setting user flags')
         self.set_default_flags()
         #self.set_default_perms(unit_id=self.id)
 
         return response
 
     def set_default_perms(self, unit_id: str | int | None) -> None:
+        # TODO: Convert hexadecimals to integers
         flags = [
             0x0001, # View item and basic properties
             0x0002, # View detailed item properties
@@ -55,7 +39,7 @@ class User(Session):
             0x4000  # View attached files
         ]
         params = {
-            "userId": self.id,
+            "userId": self.creds["userId"],
             "itemId": unit_id,
             "accessMask": sum(flags)
         }
@@ -63,16 +47,18 @@ class User(Session):
 
     def set_default_flags(self) -> None:
         params = {
-            "userId": self.id,
+            "userId": self.creds["userId"],
             "flags": 0x02,
             "flagsMask": 0x00
         }
         self.session.wialon_api.user_update_user_flags(**params)
 
-    def email_creds(self, data: dict) -> bool:
-        email = EmailUser(data=data)
-        return email.send()
+    def email_creds(self, creds: dict) -> bool:
+        email = EmailUser(creds=creds)
+        return email.send(to_addr=creds["email"])
 
-    def assign_phone(self) -> None:
-        params = { "itemId": self.id, "phoneNumber": self.phone }
-        self.session.wialon_api.unit_update_phone(**params)
+    def assign_phone(self, phone_number: str) -> bool:
+        params = { "itemId": self.creds["userId"], "phoneNumber": phone_number }
+        response = self.session.wialon_api.unit_update_phone(**params)
+        # TODO: I have no idea what self.session.wialon_api.unit_update_phone() returns
+        return bool(response)
