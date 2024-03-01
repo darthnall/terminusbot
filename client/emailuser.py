@@ -49,10 +49,13 @@ class EmailUser:
 
     def fill_soup(self, soup: BeautifulSoup, creds: dict) -> BeautifulSoup:
         key: list[str] = ["Username: ", creds["email"], "Password: ", creds["password"]]
-        inputs: list[Tag] = [soup.find_all("td")]
+        inputs: list[Tag] = [tag for tag in soup.find_all("td")]
+        print(inputs)
 
         for index, value in enumerate(inputs):
             value.string = key[index]
+
+        print(soup)
 
         return soup
 
@@ -70,6 +73,5 @@ class EmailUser:
 
 if __name__ == "__main__":
     load_dotenv()
-    creds = {"email": "blake@terminusgps.com", "password": "AReallySecurePassword123!"}
+    creds = {"email": "blakenall@proton.me", "password": "AReallySecurePassword123!"}
     email = EmailUser(creds=creds)
-    print(email.send(to_addr="blakenall@proton.me"))
