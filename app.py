@@ -33,7 +33,8 @@ def create_app(token: str | None):
                 else:
                     response = unit.assign(user_id=user.id)
 
-                user.email_creds(creds=user.creds)
+                if user.email_creds(creds=user.creds):
+                    print(f"Credentials emailed to {user.email}")
 
                 if not isinstance(response, dict):
                     page = "response.raw.html"

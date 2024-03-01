@@ -1,14 +1,13 @@
 import os
-from dotenv import load_dotenv
+import smtplib
+import ssl
+from email.message import EmailMessage
 
 from bs4 import BeautifulSoup, Tag
-
-from email.message import EmailMessage
-import ssl
-import smtplib
+from dotenv import load_dotenv
 
 
-class EmailUser():
+class EmailUser:
     def __init__(self, creds: dict):
         self._email_password = os.environ["EMAIL_PASSWORD"]
         self._soup = self.cook_soup(creds=creds)
@@ -36,9 +35,9 @@ class EmailUser():
 
     def create_message(self, to_addr: str) -> EmailMessage:
         msg = EmailMessage()
-        msg['From'] = self.from_addr
-        msg['To'] = to_addr
-        msg['Subject'] = self.subject
+        msg["From"] = self.from_addr
+        msg["To"] = to_addr
+        msg["Subject"] = self.subject
         msg.set_content(self.body, subtype="html")
 
         return msg
@@ -46,20 +45,24 @@ class EmailUser():
     def cook_soup(self, creds: dict) -> BeautifulSoup:
         with open("client/emailuser.html", "r") as html:
             soup: BeautifulSoup = BeautifulSoup(html, features="html.parser")
-            soup = self.fill_soup(soup=soup, creds=creds)
-
-            return soup
+            return self.fill_soup(soup=soup, creds=creds)
 
     def fill_soup(self, soup: BeautifulSoup, creds: dict) -> BeautifulSoup:
-            inputs: list[Tag] = soup.find_all("h2")
-            inputs.extend(soup.find_all("a"))
+        inputs: list[Tag] = [
+            inputs for i, input in enumerate(soup.find_all("td")) if i in (1, 3)
+        ]
+        inputs.extend(soup.find_all("a"))
 
-            subs: list[tuple] = [("username", creds["email"]), ("password", creds["password"]), ("return_url", f"https://terminusgps.com/login?username={creds['email']}")]
+        substitution = [
+            creds["email"],
+            creds["password"],
+            f"https://hosting.terminusgps.com/login?email={creds['email']}",
+        ]
 
-            for index, input in enumerate(inputs):
-                input.string = subs[index][1]
+        for index, value in enumerate(inputs):
+            value.string = substitution[index]
 
-            return soup
+        return soup
 
     def send(self, to_addr: str) -> bool:
         msg = self.create_message(to_addr=to_addr)
@@ -72,11 +75,9 @@ class EmailUser():
             return True
         return False
 
+
 if __name__ == "__main__":
     load_dotenv()
-    creds = {
-        "email": "blake@terminusgps.com",
-        "password": "AReallySecurePassword123!"
-    }
+    creds = {"email": "blake@terminusgps.com", "password": "AReallySecurePassword123!"}
     email = EmailUser(creds=creds)
     print(email.send(to_addr="blakenall@proton.me"))
