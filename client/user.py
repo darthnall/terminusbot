@@ -1,13 +1,14 @@
 from auth import Session
 from . import EmailUser
-from . import gen_password
+import random
+import string
 
 
 class User(Session):
     def __init__(self, data: dict, session: Session):
         self.session = session
         self.creds = { key: value for key, value in data.items() }
-        self.creds.update({ "password": gen_password(length=12) })
+        self.creds.update({ "password": self.generate_password(length=12) })
 
     def __repr__(self) -> str: return f'User credentials: {self.creds}'
 
@@ -62,3 +63,22 @@ class User(Session):
         response = self.session.wialon_api.unit_update_phone(**params)
         # TODO: I have no idea what self.session.wialon_api.unit_update_phone() returns
         return bool(response)
+
+    def generate_password(self, length: int) -> str:
+        """
+        Password requirements:
+            - At least one lowercase letter
+            - At least one number
+            - At least one special character
+            - At least one uppercase letter
+            - Different from username
+            - Minumum 8 charcters
+        """
+        password_list: list = []
+
+        for i in range(length - 3):
+            password_list += random.choice(list(string.ascii_lowercase))
+        password_list += random.choice(list(string.ascii_uppercase))
+        password_list += random.choice(["!", "@", "#", "$"])
+        password_list += str(random.choice(range(1, 9, 1)))
+        return "".join(password_list)
