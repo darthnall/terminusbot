@@ -22,9 +22,6 @@ class Session:
         self.wialon_api.core_logout()
         return True
 
-    def __repr__(self) -> str:
-        return f"{self = }"
-
     @property
     def sid(self) -> str:
         return self.wialon_api.sid
