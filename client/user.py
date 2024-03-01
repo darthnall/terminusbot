@@ -6,8 +6,8 @@ from . import gen_password
 class User(Session):
     def __init__(self, data: dict, session: Session):
         self.session = session
-        self.creds = {key: value for key, value in data}
-        self.creds.update({"password": gen_password(length=12)})
+        self.creds = { key: value for key, value in data.items() }
+        self.creds.update({ "password": gen_password(length=12) })
 
     def __repr__(self) -> str: return f'User credentials: {self.creds}'
 

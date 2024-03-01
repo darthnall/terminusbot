@@ -23,18 +23,18 @@ def create_app(token: str | None):
             page = "response.html"
             with Session(token=token) as session:
                 user = User(data=data, session=session)
-                user.create(name=user.email, password=user.password)
+                user.create(name=user.creds["email"], password=user.creds["password"])
 
-                unit = Unit(data=data, session=session)
+                unit = Unit(creds=user.creds, session=session)
 
                 if unit.id is None:
                     error = "Unit not found.\nPlease double check your IMEI number and try again."
                     return render_template("rejected.html", title="Error", error=error)
                 else:
-                    response = unit.assign(user_id=user.id)
+                    response = unit.assign(user_id=user.creds["userId"])
 
                 if user.email_creds(creds=user.creds):
-                    print(f"Credentials emailed to {user.email}")
+                    print(f"Credentials emailed to {user.creds['email']}")
 
                 if not isinstance(response, dict):
                     page = "response.raw.html"

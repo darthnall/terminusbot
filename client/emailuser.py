@@ -48,19 +48,11 @@ class EmailUser:
             return self.fill_soup(soup=soup, creds=creds)
 
     def fill_soup(self, soup: BeautifulSoup, creds: dict) -> BeautifulSoup:
-        inputs: list[Tag] = [
-            inputs for i, input in enumerate(soup.find_all("td")) if i in (1, 3)
-        ]
-        inputs.extend(soup.find_all("a"))
-
-        substitution = [
-            creds["email"],
-            creds["password"],
-            f"https://hosting.terminusgps.com/login?email={creds['email']}",
-        ]
+        key: list[str] = ["Username: ", creds["email"], "Password: ", creds["password"]]
+        inputs: list[Tag] = [soup.find_all("td")]
 
         for index, value in enumerate(inputs):
-            value.string = substitution[index]
+            value.string = key[index]
 
         return soup
 
