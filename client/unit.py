@@ -44,9 +44,8 @@ class Unit():
         params = {"userId": user_id, "itemId": self.id, "accessMask": sum(flags)}
 
         response = self.session.wialon_api.user_update_item_access(**params)
-        print(response)
         if self.rename():
-            print('Unit renamed')
+            print(f"Unit renamed successfully to {self.name}")
         return response
 
     def rename(self) -> bool:
