@@ -5,12 +5,25 @@ import dotenv
 from flask import Flask, render_template, request
 
 from auth import Session
-from client import Unit, User
+from client import Unit, User, Flags
 from wialon import Wialon, WialonError
 
 
-def create_app(token: str | None):
+def create_app(token: str, debug_mode_enabled: bool = False):
     app = Flask(__name__)
+
+    if debug_mode_enabled:
+        @app.route("/debug", methods=["GET", "POST"])
+        def debug():
+            if request.method == "GET":
+                with Session(token=token) as session:
+                    flags = Flags(session=session)
+                    data = flags.convert(flags.UNIT_DEFAULT)
+                return render_template("debug.html", data=data, title="Debug")
+            elif request.method == "POST":
+                ...
+            else:
+                ...
 
     @app.route("/register", methods=["GET", "POST"])
     def register():
@@ -49,5 +62,5 @@ def create_app(token: str | None):
 if __name__ == "__main__":
     dotenv.load_dotenv()
     token = os.environ["WIALON_HOSTING_API_TOKEN_DEV"]
-    app = create_app(token=token)
+    app = create_app(token=token, debug_mode_enabled=True)
     app.run(debug=True)
