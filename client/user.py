@@ -5,8 +5,7 @@ from auth import Session
 
 from . import EmailUser
 
-
-class User(Session):
+class User():
     def __init__(self, data: dict, session: Session):
         self.session = session
         self.creds = {key: value for key, value in data.items()}
