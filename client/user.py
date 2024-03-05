@@ -1,15 +1,17 @@
-import random
+import secrets
 import string
 
 from auth import Session
 
 from . import EmailUser
 
-class User():
+
+class User:
     def __init__(self, data: dict, session: Session):
         self.session = session
         self.creds = {key: value for key, value in data.items()}
         self.creds.update({"password": self.generate_password(length=12)})
+        print(f"Created user `{self.creds['email']}`\n{self.creds = }")
 
     def __repr__(self) -> str:
         return f"User credentials: {self.creds}"
@@ -63,6 +65,7 @@ class User():
         return bool(response)
 
     def generate_password(self, length: int) -> str:
+        length += 1
         """
         Password requirements:
             - At least one lowercase letter
@@ -72,11 +75,19 @@ class User():
             - Different from username
             - Minumum 8 charcters
         """
-        password_list: list = []
+        letters: tuple = tuple(string.ascii_letters)
+        numbers: tuple = tuple(string.digits)
+        symbols: tuple = ("@", "#", "$", "%")
 
-        for i in range(length - 3):
-            password_list += random.choice(list(string.ascii_lowercase))
-        password_list += random.choice(list(string.ascii_uppercase))
-        password_list += random.choice(["!", "@", "#", "$"])
-        password_list += str(random.choice(range(1, 9, 1)))
-        return "".join(password_list)
+        while True:
+            password = "".join(
+                secrets.choice(letters + numbers + symbols) for i in range(length)
+            )
+            if (
+                any(c.islower() for c in password)
+                and any(c.isupper() for c in password)
+                and sum(c.isdigit() for c in password) >= 3
+            ):
+                break
+
+        return password

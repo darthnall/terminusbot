@@ -4,7 +4,7 @@ import os
 import dotenv
 from flask import Flask, render_template, request
 
-from auth import Session
+from auth import Session, Validator
 from client import Unit, User, Flags
 from wialon import Wialon, WialonError
 
@@ -35,16 +35,16 @@ def create_app(token: str, debug_mode_enabled: bool = False):
             data = request.form
             page = "response.html"
             with Session(token=token) as session:
+                validator = Validator(session=session)
+                success = validator.validate(data=data)
+                if isinstance(success, dict):
+                    return render_template("rejected.html", title="Error", error="Bad data")
+
                 user = User(data=data, session=session)
                 user.create(name=user.creds["email"], password=user.creds["password"])
 
                 unit = Unit(creds=user.creds, session=session)
-
-                if unit.id is None:
-                    error = "Unit not found.\nPlease double check your IMEI number and try again."
-                    return render_template("rejected.html", title="Error", error=error)
-                else:
-                    response = unit.assign(user_id=user.creds["userId"])
+                response = unit.assign(user_id=user.creds["userId"])
 
                 if user.email_creds(creds=user.creds):
                     print(f"Credentials emailed to {user.creds['email']}")

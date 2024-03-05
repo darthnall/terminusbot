@@ -50,12 +50,9 @@ class EmailUser:
     def fill_soup(self, soup: BeautifulSoup, creds: dict) -> BeautifulSoup:
         key: list[str] = ["Username: ", creds["email"], "Password: ", creds["password"]]
         inputs: list[Tag] = [tag for tag in soup.find_all("td")]
-        print(inputs)
 
         for index, value in enumerate(inputs):
             value.string = key[index]
-
-        print(soup)
 
         return soup
 

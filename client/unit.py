@@ -1,19 +1,16 @@
 from vininfo import Vin
 
-from auth import Search, Session
+from auth import Searcher, Session
 from wialon import WialonError
 
 
-class Unit():
+class Unit:
     def __init__(self, creds: dict, session: Session):
         self.session = session
-
-        search = Search(self.session)
         self._imei = creds["imei"]
-        if search.imei_to_id(self._imei):
-            self._id = search.imei_to_id(self._imei)
-        else:
-            self._id = None
+
+        search = Searcher(session=self.session)
+        self._id = search.imei_to_id(creds["imei"])
 
         self._name = creds["assetName"]
 
@@ -37,8 +34,6 @@ class Unit():
             4194304,  # Edit counters
             33554432,  # Register events
             268435456,  # View service intervals
-            # 0x0400000000, # View commands
-            # 0x8000000000,  # Use unit in jobs, notifications, routes, retranslators
         ]
 
         params = {"userId": user_id, "itemId": self.id, "accessMask": sum(flags)}
