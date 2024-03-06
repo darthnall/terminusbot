@@ -12,18 +12,33 @@ from wialon import Wialon, WialonError
 def create_app(token: str, debug_mode_enabled: bool = False):
     app = Flask(__name__)
 
-    if debug_mode_enabled:
-        @app.route("/debug", methods=["GET", "POST"])
-        def debug():
-            if request.method == "GET":
-                with Session(token=token) as session:
-                    flags = Flags(session=session)
-                    data = flags.convert(flags.UNIT_DEFAULT)
-                return render_template("debug.html", data=data, title="Debug")
-            elif request.method == "POST":
-                ...
-            else:
-                ...
+    @app.route("/register/v/first-name", methods=["POST"])
+    def validate_first_name():
+        pass
+
+    @app.route("/register/v/last-name", methods=["POST"])
+    def validate_last_name():
+        pass
+
+    @app.route("/register/v/email", methods=["POST"])
+    def validate_email():
+        pass
+
+    @app.route("/register/v/asset-name", methods=["POST"])
+    def validate_asset_name():
+        pass
+
+    @app.route("/register/v/imei", methods=["POST"])
+    def validate_imei():
+        pass
+
+    @app.route("/register/v/phone-number", methods=["POST"])
+    def validate_phone_number():
+        pass
+
+    @app.route("/register/v/vin", methods=["POST"])
+    def validate_vin():
+        pass
 
     @app.route("/register", methods=["GET", "POST"])
     def register():

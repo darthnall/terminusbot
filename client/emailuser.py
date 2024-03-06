@@ -9,7 +9,7 @@ from smtplib import SMTPException
 
 
 class EmailUser:
-    def __init__(self, creds: dict):
+    def __init__(self, creds: dict) -> None:
         self._email_password = os.environ["EMAIL_PASSWORD"]
         self._soup = self.cook_soup(creds=creds)
         self._body = str(self._soup)
