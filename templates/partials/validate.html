@@ -1,0 +1,50 @@
+{% extends '../index.html' %}
+{% block validation_response %}
+    {% for key, is_valid in data.items() %}
+    <div class="col-md">
+    <label for="{{ key }}" class="form-label">{{ key }}</label>
+        <input type="text"
+            class="form-control {{ 'is_valid' if is_valid else 'is_invalid' }}"
+            name="{{ key }}"
+            id="{{ key }}"
+            hx-trigger="keyup changed delay:500ms"
+            {% if key == 'firstName' %}
+                placeholder="First"
+                hx-post="/register/v/first-name"
+                oninput="updateAssetName()"
+                required>
+                <div class="invalid-feedback">Invalid first name.</div>
+            {% elif key == 'lastName' %}
+                placeholder="Last"
+                hx-post="/register/v/last-name"
+                required>
+                <div class="invalid-feedback">Invalid last name.</div>
+            {% elif key == 'email' %}
+                placeholder="Email"
+                hx-post="/register/v/email"
+                required>
+                <div class="invalid-feedback">Invalid email address.</div>
+            {% elif key == 'assetName' %}
+                placeholder="Email"
+                hx-post="/register/v/asset-name"
+                oninput="disableAutoUpdate(event)"
+                required>
+                <div class="invalid-feedback">Invalid asset name.</div>
+            {% elif key == 'phoneNumber' %}
+                placeholder="Phone #"
+                hx-post="/register/v/phone-number">
+                <div class="invalid-feedback">Invalid phone #.</div>
+            {% elif key == 'imei' %}
+                placeholder="IMEI #"
+                hx-post="/register/v/imei"
+                required>
+                <div class="invalid-feedback">Invalid IMEI #.</div>
+            {% elif key == 'vin' %}
+                placeholder="VIN #"
+                hx-post="/register/v/vin">
+                <div class="invalid-feedback">Invalid VIN #.</div>
+            {% endif %}
+        <div class="valid-feedback">Looks good!</div>
+    </div>
+    {% endfor %}
+{% endblock %}

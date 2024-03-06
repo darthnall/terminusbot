@@ -4,7 +4,7 @@ import os
 import dotenv
 from flask import Flask, render_template, request
 
-from auth import Session, Validator
+from auth import Session, Searcher, Validator
 from client import Unit, User, Flags
 from wialon import Wialon, WialonError
 
@@ -35,10 +35,8 @@ def create_app(token: str, debug_mode_enabled: bool = False):
             data = request.form
             page = "response.html"
             with Session(token=token) as session:
-                validator = Validator(session=session)
-                success = validator.validate(data=data)
-                if isinstance(success, dict):
-                    return render_template("rejected.html", title="Error", error="Bad data")
+                validator: Validator = Validator(session=session)
+                valid, bad_items = validator.validate(data=data)
 
                 user = User(data=data, session=session)
                 user.create(name=user.creds["email"], password=user.creds["password"])

@@ -5,11 +5,22 @@ from dotenv import load_dotenv
 from . import Searcher, Session
 
 
-class Validator:
-    def __init__(self, session: Session) -> None:
+class Validator(Session):
+    def __init__(self, session: Session, token: str) -> None:
         self.session = session
+        super().__init__(token=token)
 
-    def validate(self, data: dict) -> dict | bool:
+    def __enter__(self):
+        super().__enter__()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        super().__exit__(exc_type, exc_val, exc_tb)
+        return None
+
+    def validate_all(self, data: dict[str, str]) -> dict[str, bool | list | None]:
+        _valid: bool = False
+
         results = {
             "firstName": self.validate_name(target=data["firstName"]),
             "lastName": self.validate_name(target=data["lastName"]),
@@ -19,26 +30,33 @@ class Validator:
             "imei": self.validate_imei(target=data["imei"]),
             "vin": self.validate_vin(target=data["vin"]),
         }
+
         bad_items = [key for key, value in results.items() if value is not True]
-        if bad_items:
-            return {"error": "bad validation", "items": bad_items}
-        return True
+
+        return { "is_valid": _valid, 'error_fields': bad_items }
 
     def validate_name(self, target: str) -> bool:
+        _valid: bool = False
         print(f"validating `{target}`")
+
         if target.lower().isalpha():
+            _valid = True
             print(f"`{target = }...OK`")
-            return True
-        return False
+
+        return _valid
 
     def validate_asset_name(self, target: str) -> bool:
+        _valid: bool = False
         print(f"validating `{target}`")
+
         if len(target) < 60:
             print(f"`{target = }...OK`")
-            return True
-        return False
+            _valid = True
+
+        return _valid
 
     def validate_email(self, target: str) -> bool:
+        _valid: bool = False
         print(f"validating `{target}`")
         valid_endings: tuple = (
             ".com",
@@ -54,28 +72,40 @@ class Validator:
             addr: list[str] = target.split("@")
             if addr[0].lower().isalnum() and addr[1].endswith(valid_endings):
                 print(f"`{target = }...OK`")
-                return True
+                _valid = True
         except AttributeError:
-            return False
-        return False
+            _valid = False
+        return _valid
 
     def validate_phone(self, target: str) -> bool:
+        _valid: bool = False
+
         print(f"validating `{target}`")
+        _valid = True
+
         print(f"`{target = }...OK`")
-        return True
+        return _valid
 
     def validate_imei(self, target: str) -> bool:
+        _valid: bool = False
         print(f"validating `{target}`")
+
         if target == "":
             print(f"error: `{target = }` :: expected non-empty string")
-            return False
-        with Searcher(session=self.session) as search:
-            if search.imei_to_id(target):
+            _valid = False
+
+        with Searcher() as search:
+            if search.by_imei(imei=target):
                 print(f"`{target = }...OK`")
-                return True
-            return False
+                _valid = True
+
+        return _valid
 
     def validate_vin(self, target: str) -> bool:
+        _valid: bool = False
+
         print(f"validating `{target}`")
+        _valid = True
+
         print(f"`{target = }...OK`")
-        return True
+        return _valid

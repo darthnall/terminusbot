@@ -1,20 +1,40 @@
+import os
+
+from dotenv import load_dotenv
+
 from . import Session
 
 
-class Searcher():
-    def __init__(self, session: Session):
-        self.session = session
+class Searcher(Session):
+    def __init__(self) -> None:
+        load_dotenv()
+        token = os.environ["WIALON_HOSTING_API_TOKEN_DEV"]
+        super().__init__(token=token)
 
     def __enter__(self):
+        super().__enter__()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_type is not None:
-            print(f"exc_type: {exc_type}, exc_val: {exc_val}, exc_tb: {exc_tb}")
-            return False
-        return True
+    def __exit__(self, exc_type, exc_val, exc_tb) -> str | None:
+        super().__exit__(exc_type, exc_val, exc_tb)
+        return None
 
-    def imei_to_id(self, imei: str) -> int | None:
+    def by_imei(self, imei: str) -> int | None:
+        """
+        Search for an item by its IMEI number.
+
+        Parameters
+        ----------
+        imei : str
+            The IMEI number to search for.
+
+        Returns
+        -------
+        int | None
+            The ID of the item if found, otherwise None.
+        """
+
+        __id: int | None = None
         params = {
             "spec": {
                 "itemsType": "avl_unit",
@@ -28,8 +48,16 @@ class Searcher():
             "to": 0,
         }
 
-        response = self.session.wialon_api.core_search_items(**params)
+        response = self.wialon_api.core_search_items(**params)
+
         try:
-            return int(response["items"][0]["id"])
+            print(f"{response = }")
+
+            for index, item in enumerate(response["items"]):
+                print(f'{response["items"][index]["id"]}')
+            __id = int(response["items"][0]["id"])
         except IndexError:
-            return None
+            print(f"IndexError: {response = }")
+            __id = None
+
+        return __id

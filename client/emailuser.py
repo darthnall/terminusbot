@@ -5,6 +5,7 @@ from email.message import EmailMessage
 
 from bs4 import BeautifulSoup, Tag
 from dotenv import load_dotenv
+from smtplib import SMTPException
 
 
 class EmailUser:
@@ -62,10 +63,13 @@ class EmailUser:
         context = ssl.create_default_context()
 
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            server.login(self.from_addr, self.email_password)
-            server.sendmail(self.from_addr, to_addr, msg.as_string())
-            return True
-        return False
+            try:
+                server.login(self.from_addr, self.email_password)
+                server.sendmail(self.from_addr, to_addr, msg.as_string())
+                _success = True
+            except smtplib.SMTPException:
+                _success = False
+        return _success
 
 
 if __name__ == "__main__":

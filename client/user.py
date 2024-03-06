@@ -2,12 +2,13 @@ import secrets
 import string
 
 from auth import Session
+from typing import Iterable
 
 from . import EmailUser
 
 
 class User:
-    def __init__(self, data: dict, session: Session):
+    def __init__(self, data: dict[str, str], session: Session):
         self.session = session
         self.creds = {key: value for key, value in data.items()}
         self.creds.update({"password": self.generate_password(length=12)})
@@ -32,7 +33,7 @@ class User:
 
         return response
 
-    def set_default_perms(self, unit_id: str | int | None) -> None:
+    def set_default_perms(self, unit_id: int) -> None:
         # TODO: Convert hexadecimals to integers
         flags = [
             0x0001,  # View item and basic properties
@@ -51,12 +52,13 @@ class User:
         self.session.wialon_api.user_update_item_access(**params)
 
     def set_default_flags(self) -> None:
-        params = {"userId": self.creds["userId"], "flags": 0x02, "flagsMask": 0x00}
+        params = {"userId": self.creds["userId"], "flags": 2, "flagsMask": 0}
         self.session.wialon_api.user_update_user_flags(**params)
 
-    def email_creds(self, creds: dict) -> bool:
-        email = EmailUser(creds=creds)
-        return email.send(to_addr=creds["email"])
+    def email_creds(self) -> bool:
+        to_addr = self.creds["email"]
+        email = EmailUser(creds=self.creds)
+        return email.send(to_addr=to_addr)
 
     def assign_phone(self, phone_number: str) -> bool:
         params = {"itemId": self.creds["userId"], "phoneNumber": phone_number}

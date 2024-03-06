@@ -12,8 +12,6 @@
                            placeholder="First"
                            oninput="updateAssetName()"
                            required>
-                    <div class="valid-feedback">Looks good!</div>
-                    <div class="invalid-feedback">Looks bad!</div>
                 </div>
                 <div class="col-md">
                     <label for="lastName" class="form-label">Last Name</label>
@@ -22,11 +20,7 @@
                            name="lastName"
                            id="lastName"
                            placeholder="Last"
-                           hx-post="/register/v/last-name"
-                           hx-trigger="keyup changed delay:500ms"
                            required>
-                    <div class="valid-feedback">Looks good!</div>
-                    <div class="invalid-feedback">Looks bad!</div>
                 </div>
             </div>
             <div class="row g-2 input-group">
@@ -37,11 +31,7 @@
                            name="email"
                            id="email"
                            placeholder="Email"
-                           hx-post="/register/v/email"
-                           hx-trigger="keyup changed delay:500ms"
                            required>
-                    <div class="valid-feedback">Looks good!</div>
-                    <div class="invalid-feedback">Looks bad!</div>
                 </div>
                 <div class="col-md">
                     <label for="assetName" class="form-label">Asset Name</label>
@@ -50,27 +40,18 @@
                            name="assetName"
                            id="assetName"
                            placeholder="Asset"
-                           hx-post="/register/v/asset-name"
-                           hx-trigger="keyup changed delay:500ms"
-                           oninput="disableAutoUpdate(event)"
-                           required>
-                    <div class="valid-feedback">Looks good!</div>
-                    <div class="invalid-feedback">Looks bad!</div>
+                           oninput="disableAutoUpdate(event)">
                 </div>
             </div>
             <div class="row g-2 input-group">
                 <div class="col-md">
                     <label for="phoneNumber" class="form-label">Phone Number</label>
-                    <span class="input-group-text" id="basic-addon1">+1</span>
+                    <span class="input-group-test" id="basic-addon1">+1</span>
                     <input type="tel"
                            class="form-control"
                            name="phoneNumber"
                            id="phoneNumber"
-                           hx-post="/register/v/phone-number"
-                           hx-trigger="keyup changed delay:500ms"
                            placeholder="Phone #">
-                    <div class="valid-feedback">Looks good!</div>
-                    <div class="invalid-feedback">Invalid phone #.</div>
                 </div>
                 <div class="col-md">
                     <label for="imei" class="form-label">IMEI Number</label>
@@ -81,8 +62,6 @@
                                id="imei"
                                placeholder="IMEI #"
                                value="{{ imei }}"
-                               hx-post="/register/v/imei"
-                               hx-trigger="keyup changed delay:500ms"
                                required>
                     {% else %}
                         <input type="number"
@@ -90,12 +69,8 @@
                                name="imei"
                                id="imei"
                                placeholder="IMEI #"
-                               hx-post="/register/v/imei"
-                               hx-trigger="keyup changed delay:500ms"
                                required>
                     {% endif %}
-                    <div class="valid-feedback">Looks good!</div>
-                    <div class="invalid-feedback">IMEI # not found.</div>
                 </div>
             </div>
             <div id="optionalFields" class="d-none row input-group">
@@ -109,7 +84,6 @@
                            id="vin"
                            placeholder="VIN #">
                 </div>
-                <div class="invalid-feedback">Looks bad!</div>
                 <div class="col-md">
                     <label for="test" class="form-label">
                         Test Field <i>*Optional</i>

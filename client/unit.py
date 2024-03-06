@@ -1,11 +1,10 @@
 from vininfo import Vin
 
 from auth import Searcher, Session
-from wialon import WialonError
 
 
 class Unit:
-    def __init__(self, creds: dict, session: Session):
+    def __init__(self, creds: dict, session: Session) -> None:
         self.session = session
         self._imei = creds["imei"]
 
@@ -46,6 +45,4 @@ class Unit:
     def rename(self) -> bool:
         params = {"itemId": self.id, "name": self.name}
         response = self.session.wialon_api.item_update_name(**params)
-        if response["nm"] == self.name:
-            return True
-        return False
+        return response["nm"] == self.name
