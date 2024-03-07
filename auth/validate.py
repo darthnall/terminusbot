@@ -1,22 +1,9 @@
-import os
-
-from dotenv import load_dotenv
-
 from . import Searcher, Session
 
 
-class Validator(Session):
-    def __init__(self, session: Session, token: str) -> None:
-        self.session = session
-        super().__init__(token=token)
-
-    def __enter__(self):
-        super().__enter__()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        super().__exit__(exc_type, exc_val, exc_tb)
-        return None
+class Validator:
+    def __init__(self, token: str) -> None:
+        self._token = token
 
     def validate_all(self, data: dict[str, str]) -> dict[str, bool | list | None]:
         _valid: bool = False
@@ -88,16 +75,16 @@ class Validator(Session):
 
     def validate_imei(self, target: str) -> bool:
         _valid: bool = False
-        print(f"validating `{target}`")
 
+        print(f"validating `{target}`")
         if target == "":
             print(f"error: `{target = }` :: expected non-empty string")
             _valid = False
 
-        with Searcher() as search:
-            if search.by_imei(imei=target):
-                print(f"`{target = }...OK`")
-                _valid = True
+        search = Searcher(token=self._token)
+        if search.by_imei(imei=int(target)):
+            print(f"`{target = }...OK`")
+            _valid = True
 
         return _valid
 
@@ -106,6 +93,5 @@ class Validator(Session):
 
         print(f"validating `{target}`")
         _valid = True
-
         print(f"`{target = }...OK`")
         return _valid

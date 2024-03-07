@@ -5,13 +5,11 @@ from auth import Searcher, Session
 
 class Unit:
     def __init__(self, creds: dict, session: Session) -> None:
-        self.session = session
+        self.search = Searcher(token=session.token)
+
         self._imei = creds["imei"]
-
-        search = Searcher(session=self.session)
-        self._id = search.imei_to_id(creds["imei"])
-
         self._name = creds["assetName"]
+        self._id = self.search.by_imei(creds["imei"])
 
     def __repr__(self) -> str:
         return f"{self = }"

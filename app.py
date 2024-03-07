@@ -5,12 +5,64 @@ import dotenv
 from flask import Flask, render_template, request
 
 from auth import Session, Searcher, Validator
-from client import Unit, User, Flags
+from client import Unit, User
 from wialon import Wialon, WialonError
 
 
-def create_app(token: str, debug_mode_enabled: bool = False):
+def create_app(token: str):
     app = Flask(__name__)
+
+
+
+    @app.route("/register", methods=["GET", "POST"])
+    def register():
+        if request.method == "GET":
+            imei = request.args.get("imei")
+            return render_template("register.html", title="Registration", imei=imei)
+
+        elif request.method == "POST":
+            data = request.form
+            page = "response.html"
+            # Open session > Create the user > Add unit to user > email credentials
+            with Session(token=token) as session:
+                user = User(data=data, session=session)
+                user.create(
+                    name = user.creds["email"],
+                    password = user.creds["password"]
+                )
+
+                unit = Unit(creds=user.creds, session=session)
+                response = unit.assign(user_id=user.creds["userId"])
+
+
+            if user.email_creds():
+                print(f"Credentials emailed to {user.creds['email']}")
+
+            if not isinstance(response, dict):
+                page = "response.raw.html"
+
+            return render_template(
+                page, response=response, title="Response", redirect="register"
+            )
+        else:
+            return "404"
+
+    @app.route("/register/imei", methods=["GET", "POST"])
+    def validate_imei():
+        if request.method == "GET":
+            imei = "869084062042605"
+            if Validator(token=token).validate_imei(target=imei):
+                print("Found IMEI")
+            else:
+                print("IMEI not found")
+
+            return render_template("register.html", title="Registration", imei=imei)
+
+        elif request.method == "POST":
+            return render_template("index.html", title=None)
+
+        else:
+            return render_template("index.html", title=None)
 
     """
     @app.route("/register/v/first-name", methods=["POST"])
@@ -29,9 +81,6 @@ def create_app(token: str, debug_mode_enabled: bool = False):
     def validate_asset_name():
         pass
 
-    @app.route("/register/v/imei", methods=["POST"])
-    def validate_imei():
-        pass
 
     @app.route("/register/v/phone-number", methods=["POST"])
     def validate_phone_number():
@@ -42,34 +91,6 @@ def create_app(token: str, debug_mode_enabled: bool = False):
         pass
     """
 
-    @app.route("/register", methods=["GET", "POST"])
-    def register():
-        if request.method == "GET":
-            imei = request.args.get("imei")
-            return render_template("register.html", title="Registration", imei=imei)
-
-        elif request.method == "POST":
-            data = request.form
-            page = "response.html"
-            with Session(token=token) as session:
-                validator: Validator = Validator(session=session)
-                valid, bad_items = validator.validate(data=data)
-
-                user = User(data=data, session=session)
-                user.create(name=user.creds["email"], password=user.creds["password"])
-
-                unit = Unit(creds=user.creds, session=session)
-                response = unit.assign(user_id=user.creds["userId"])
-
-                if user.email_creds():
-                    print(f"Credentials emailed to {user.creds['email']}")
-
-                if not isinstance(response, dict):
-                    page = "response.raw.html"
-
-                return render_template(
-                    page, response=response, title="Response", redirect="register"
-                )
 
     return app
 
@@ -77,5 +98,5 @@ def create_app(token: str, debug_mode_enabled: bool = False):
 if __name__ == "__main__":
     dotenv.load_dotenv()
     token = os.environ["WIALON_HOSTING_API_TOKEN_DEV"]
-    app = create_app(token=token, debug_mode_enabled=True)
+    app = create_app(token=token)
     app.run(debug=True)

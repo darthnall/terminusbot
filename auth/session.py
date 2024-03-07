@@ -11,6 +11,8 @@ class Session:
         # Login to the Wialon API
         login = self.wialon_api.token_login(token=self._token)
         self.wialon_api.sid = login["eid"]
+        self._sid = login["eid"]
+
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> str | None:
@@ -24,4 +26,4 @@ class Session:
 
     @property
     def sid(self) -> str:
-        return self.wialon_api.sid
+        return self._sid
