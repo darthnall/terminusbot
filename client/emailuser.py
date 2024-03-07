@@ -10,9 +10,9 @@ from smtplib import SMTPException
 
 class EmailUser:
     def __init__(self, creds: dict) -> None:
-        self._email_password = os.environ["EMAIL_PASSWORD"]
-        self._soup = self.cook_soup(creds=creds)
-        self._body = str(self._soup)
+        self._email_password: str = os.environ["EMAIL_PASSWORD"]
+        self._soup: BeautifulSoup = self.cook_soup(creds=creds)
+        self._body: str = str(self._soup)
 
     @property
     def body(self) -> str:
@@ -43,7 +43,7 @@ class EmailUser:
 
         return msg
 
-    def cook_soup(self, creds: dict) -> BeautifulSoup:
+    def cook_soup(self, creds: dict[str, str]) -> BeautifulSoup:
         with open("client/emailuser.html", "r") as html:
             soup: BeautifulSoup = BeautifulSoup(html, features="html.parser")
             return self.fill_soup(soup=soup, creds=creds)

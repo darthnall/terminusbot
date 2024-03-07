@@ -2,7 +2,6 @@ import secrets
 import string
 
 from auth import Session
-from typing import Iterable
 
 from . import EmailUser
 
@@ -12,12 +11,27 @@ class User:
         self.session = session
         self.creds = {key: value for key, value in data.items()}
         self.creds.update({"password": self.generate_password(length=12)})
-        print(f"Created user `{self.creds['email']}`\n{self.creds = }")
 
     def __repr__(self) -> str:
-        return f"User credentials: {self.creds}"
+        return f"{self.creds = }"
 
     def create(self, name: str, password: str) -> dict:
+        """
+        Create a new user.
+
+        Parameters
+        ----------
+        name: <str>
+            The name of the new user.
+        password: <str>
+            The password of the new user.
+
+        Returns
+        -------
+        _success: <bool>
+            True if the user was created, False otherwise.
+
+        """
         params = {
             "creatorId": 27881459,  # Terminus-1000's user id
             "name": name,  # User's email
@@ -29,12 +43,27 @@ class User:
 
         self.creds["userId"] = response["item"]["id"]
         self.set_default_flags()
-        # self.set_default_perms(unit_id=self.id)
 
-        return response
+        _success = response
+
+        return _success
 
     def set_default_perms(self, unit_id: int) -> None:
         # TODO: Convert hexadecimals to integers
+        """
+        Set user's default flags.
+
+        Parameters
+        ----------
+        unit_id: <int>
+            The ID of the unit to set permissions for.
+
+        Returns
+        -------
+        _success: <bool>
+            True if the flags were set, False otherwise.
+
+        """
         flags = [
             0x0001,  # View item and basic properties
             0x0002,  # View detailed item properties
@@ -52,33 +81,97 @@ class User:
         self.session.wialon_api.user_update_item_access(**params)
 
     def set_default_flags(self) -> None:
+        """
+        Set user's default flags.
+
+        Returns
+        -------
+        _success: <bool>
+            True if the flags were set, False otherwise.
+
+        """
         params = {"userId": self.creds["userId"], "flags": 2, "flagsMask": 0}
         self.session.wialon_api.user_update_user_flags(**params)
 
     def email_creds(self, creds: dict[str, str] | None = None) -> bool:
+        """
+        Email credentials to the user.
+
+        Parameters
+        ----------
+        creds: <dict[str, str]> | <None>
+            The credentials to email.
+
+        Returns
+        -------
+        _success: <bool>
+            True if the email was sent, False otherwise.
+
+        """
         if creds is not None:
             self.creds = creds
         to_addr = self.creds["email"]
         email = EmailUser(creds=self.creds)
         return email.send(to_addr=to_addr)
 
-    def assign_phone(self, phone_number: str) -> bool:
-        params = {"itemId": self.creds["userId"], "phoneNumber": phone_number}
-        response = self.session.wialon_api.unit_update_phone(**params)
-        # TODO: I have no idea what self.session.wialon_api.unit_update_phone() returns
-        return bool(response)
+    def assign_phone(self, user_id: int, phone_number: int) -> bool:
+        """
+        Assign a phone number to a user.
+
+        Parameters
+        ----------
+        user_id: <int>
+            Target user's ID.
+
+        phone_number: <int>
+            The phone number to assign to target.
+
+        Returns
+        -------
+        _success: <bool>
+            True if the phone number was assigned, False otherwise.
+
+        """
+        # Check if arg user_id is the same as the user's id
+        if (item_id := int(self.creds["userId"])) != user_id:
+            item_id = user_id
+
+        # Check if arg phone_number is the same as the user's phone number
+        if (num := int(self.creds["phoneNumber"])) != phone_number:
+            num = phone_number
+
+        # Update the user's phone number using Wialon API
+        params = {"itemId": item_id, "phoneNumber": num}
+
+        # NOTE: The Wialon API returns empty dict on success
+        _success = self.session.wialon_api.unit_update_phone(**params)
+
+        return bool(_success)
 
     def generate_password(self, length: int) -> str:
         """
-        Password requirements:
-            - At least one lowercase letter
-            - At least one number
-            - At least one special character
-            - At least one uppercase letter
-            - Different from username
-            - Minumum 8 charcters
-        """
+        Create a random Wialon API compliant password.
 
+        Parameters
+        ----------
+        length: <int>
+            The length of the password.
+
+        Returns
+        -------
+        password: <str>
+            The password.
+
+        Password Requirements
+        ---------------------
+        - At least one lowercase letter
+        - At least one number
+        - At least one special character
+        - At least one uppercase letter
+        - Different from username
+        - Minumum 8 charcters
+
+        """
         length += 1
         letters: tuple = tuple(string.ascii_letters)
         numbers: tuple = tuple(string.digits)
