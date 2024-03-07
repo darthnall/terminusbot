@@ -55,7 +55,9 @@ class User:
         params = {"userId": self.creds["userId"], "flags": 2, "flagsMask": 0}
         self.session.wialon_api.user_update_user_flags(**params)
 
-    def email_creds(self) -> bool:
+    def email_creds(self, creds: dict[str, str] | None = None) -> bool:
+        if creds is not None:
+            self.creds = creds
         to_addr = self.creds["email"]
         email = EmailUser(creds=self.creds)
         return email.send(to_addr=to_addr)
@@ -67,7 +69,6 @@ class User:
         return bool(response)
 
     def generate_password(self, length: int) -> str:
-        length += 1
         """
         Password requirements:
             - At least one lowercase letter
@@ -77,6 +78,8 @@ class User:
             - Different from username
             - Minumum 8 charcters
         """
+
+        length += 1
         letters: tuple = tuple(string.ascii_letters)
         numbers: tuple = tuple(string.digits)
         symbols: tuple = ("@", "#", "$", "%")

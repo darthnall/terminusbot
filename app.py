@@ -12,6 +12,7 @@ from wialon import Wialon, WialonError
 def create_app(token: str, debug_mode_enabled: bool = False):
     app = Flask(__name__)
 
+    """
     @app.route("/register/v/first-name", methods=["POST"])
     def validate_first_name():
         pass
@@ -39,6 +40,7 @@ def create_app(token: str, debug_mode_enabled: bool = False):
     @app.route("/register/v/vin", methods=["POST"])
     def validate_vin():
         pass
+    """
 
     @app.route("/register", methods=["GET", "POST"])
     def register():
@@ -59,7 +61,7 @@ def create_app(token: str, debug_mode_enabled: bool = False):
                 unit = Unit(creds=user.creds, session=session)
                 response = unit.assign(user_id=user.creds["userId"])
 
-                if user.email_creds(creds=user.creds):
+                if user.email_creds():
                     print(f"Credentials emailed to {user.creds['email']}")
 
                 if not isinstance(response, dict):
