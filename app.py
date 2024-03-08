@@ -1,6 +1,7 @@
 from auth import Session, Validator
-from client import Unit, User, create_form_data
+from client import Unit, User, create_new_form, create_validated_form
 
+from client.formdata import create_validated_form
 from flask import Flask, render_template, request
 
 import dotenv
@@ -19,7 +20,7 @@ def create_app(token: str):
             if request.args.get("imei"):
                 imei = request.args.get("imei")
 
-            data = create_form_data(
+            data = create_new_form(
                 firstName = { "valid": None, "target": "" },
                 lastName = { "valid": None, "target": "" },
                 email = { "valid": None, "target": "" },
@@ -39,6 +40,9 @@ def create_app(token: str):
             # Handle validation
             validation_results = Validator(token=token).validate_all(data=data)
             bad_items = [key for key, value in validation_results.items() if value is not True]
+            print(f"{ data = }")
+            if bad_items:
+                return render_template("register.html", title="Invalid", data=data)
 
             # Open session > Create the user > Add unit to user > email credentials
             with Session(token=token) as session:
@@ -80,9 +84,8 @@ def create_app(token: str):
             }
         }), 200, {"Content-Type": "application/json"}
 
-        # TODO: Add logging
-
         return response
+
 
     @app.route("/v/first-name", methods=["POST"])
     def validate_first_name():

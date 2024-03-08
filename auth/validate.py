@@ -103,7 +103,7 @@ class Validator:
             _valid = False
 
         search = Searcher(token=self._token)
-        if search.by_imei(imei=int(target)):
+        if search.by_imei(imei=target):
             print(f"`{target = }...OK`")
             _valid = True
 
