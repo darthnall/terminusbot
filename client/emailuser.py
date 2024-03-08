@@ -67,8 +67,10 @@ class EmailUser:
                 server.login(self.from_addr, self.email_password)
                 server.sendmail(self.from_addr, to_addr, msg.as_string())
                 _success = True
+
             except smtplib.SMTPException:
                 _success = False
+
         return _success
 
 

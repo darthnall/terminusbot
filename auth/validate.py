@@ -5,28 +5,45 @@ class Validator:
     def __init__(self, token: str) -> None:
         self._token = token
 
-    def validate_all(self, data: dict[str, str]) -> dict[str, bool | list | None]:
-        _valid: bool = False
+    def _has_banned_character(self, target: str) -> tuple[bool, list]:
+        has_banned_character = False
+        banned_characters = ["*"]
 
+        matches = [char for char in list(target) if char in banned_characters]
+
+        if any(matches):
+            has_banned_character = True
+
+        return (has_banned_character, matches)
+
+    def validate_all(self, data: dict[str, str]) -> dict:
         results = {
-            "firstName": self.validate_name(target=data["firstName"]),
-            "lastName": self.validate_name(target=data["lastName"]),
-            "email": self.validate_email(target=data["email"]),
-            "assetName": self.validate_asset_name(target=data["assetName"]),
-            "phoneNumber": self.validate_phone(target=data["phoneNumber"]),
-            "imei": self.validate_imei(target=data["imei"]),
-            "vin": self.validate_vin(target=data["vin"]),
+            "firstName": { "valid": self.validate_name(target=data["firstName"]), "target": data["firstName"] },
+            "lastName": { "valid": self.validate_name(target=data["lastName"]), "target": data["lastName"] },
+            "email": { "valid": self.validate_email(target=data["email"]), "target": data["email"] },
+            "assetName": { "valid": self.validate_asset_name(target=data["assetName"]), "target": data["assetName"] },
+            "phoneNumber": { "valid": self.validate_phone(target=data["phoneNumber"]), "target": data["phoneNumber"] },
+            "imei": { "valid": self.validate_imei(target=data["imei"]), "target": data["imei"] },
+            "vin": { "valid": self.validate_vin(target=data["vin"]), "target": data["vin"] },
         }
 
-        bad_items = [key for key, value in results.items() if value is not True]
+        return results
 
-        return { "is_valid": _valid, 'error_fields': bad_items }
+    def validate_test(self, target: str) -> bool:
+        _valid: bool = False
+        print(f"validating `{target}`")
+
+        if target != "" and target.isnumeric():
+            _valid = True
+            print(f"`{target = }...OK`")
+
+        return _valid
 
     def validate_name(self, target: str) -> bool:
         _valid: bool = False
         print(f"validating `{target}`")
 
-        if target.lower().isalpha():
+        if target != "" and target.lower().isalpha():
             _valid = True
             print(f"`{target = }...OK`")
 
@@ -36,15 +53,19 @@ class Validator:
         _valid: bool = False
         print(f"validating `{target}`")
 
-        if len(target) < 60:
-            print(f"`{target = }...OK`")
+        if target != "" and len(target) < 60:
             _valid = True
+            print(f"`{target = }...OK`")
 
         return _valid
 
     def validate_email(self, target: str) -> bool:
         _valid: bool = False
         print(f"validating `{target}`")
+
+        if target == "":
+            _valid = False
+
         valid_endings: tuple = (
             ".com",
             ".net",

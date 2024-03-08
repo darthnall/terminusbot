@@ -40,6 +40,7 @@ class Searcher:
         # Open a session and search for the item
         with Session(token=self._token) as session:
             response = session.wialon_api.core_search_items(**params)
+            print(f"{response = }")
             try:
                 __id = int(response["items"][0]["id"])
             except IndexError:

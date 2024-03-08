@@ -1,28 +1,45 @@
-import json
-import os
+from auth import Session, Validator
+from client import Unit, User, create_form_data
 
-import dotenv
 from flask import Flask, render_template, request
 
-from auth import Session, Searcher, Validator
-from client import Unit, User
-from wialon import Wialon, WialonError
+import dotenv
+import json
+import os
 
 
 def create_app(token: str):
     app = Flask(__name__)
 
 
-
-    @app.route("/register", methods=["GET", "POST"])
+    @app.route("/", methods=["GET", "POST"])
     def register():
         if request.method == "GET":
-            imei = request.args.get("imei")
-            return render_template("register.html", title="Registration", imei=imei)
+            imei = ""
+            if request.args.get("imei"):
+                imei = request.args.get("imei")
+
+            data = create_form_data(
+                firstName = { "valid": None, "target": "" },
+                lastName = { "valid": None, "target": "" },
+                email = { "valid": None, "target": "" },
+                assetName = { "valid": None, "target": "" },
+                phoneNumber = { "valid": None, "target": "" },
+                vin = { "valid": None, "target": "" },
+                imei = { "valid": None, "target": f"{imei}" },
+                testValue = { "valid": None, "target": "" },
+            )
+
+            return render_template("register.html", title="Registration", data=data)
 
         elif request.method == "POST":
             data = request.form
-            page = "response.html"
+            page = "register.html"
+
+            # Handle validation
+            validation_results = Validator(token=token).validate_all(data=data)
+            bad_items = [key for key, value in validation_results.items() if value is not True]
+
             # Open session > Create the user > Add unit to user > email credentials
             with Session(token=token) as session:
                 user = User(data=data, session=session)
@@ -47,49 +64,129 @@ def create_app(token: str):
         else:
             return "404"
 
-    @app.route("/register/imei", methods=["GET", "POST"])
-    def validate_imei():
-        if request.method == "GET":
-            imei = "869084062042605"
-            if Validator(token=token).validate_imei(target=imei):
-                print("Found IMEI")
-            else:
-                print("IMEI not found")
+    @app.route("/v/test-value", methods=["POST"])
+    def validate_test_value():
+        _valid = False
+        data = { "testValue": request.form.get("testValue") }
 
-            return render_template("register.html", title="Registration", imei=imei)
 
-        elif request.method == "POST":
-            return render_template("index.html", title=None)
+        if Validator(token=token).validate_test(target=data["testValue"]):
+            _valid = True
 
-        else:
-            return render_template("index.html", title=None)
+        response = json.dumps({
+            "testValue": {
+                "valid": _valid,
+                "target": data["testValue"]
+            }
+        }), 200, {"Content-Type": "application/json"}
 
-    """
-    @app.route("/register/v/first-name", methods=["POST"])
+        # TODO: Add logging
+
+        return response
+
+    @app.route("/v/first-name", methods=["POST"])
     def validate_first_name():
-        pass
+        _valid = False
+        data = { "firstName": request.form.get("firstName") }
 
-    @app.route("/register/v/last-name", methods=["POST"])
+
+        if Validator(token=token).validate_name(target=data["firstName"]):
+            _valid = True
+
+        response = json.dumps({
+            "firstName": {
+                "valid": _valid,
+                "target": data["firstName"]
+            }
+        }), 200, {"Content-Type": "application/json"}
+
+        # TODO: Add logging
+
+        return response
+
+
+    @app.route("/v/last-name", methods=["POST"])
     def validate_last_name():
-        pass
+        _valid = False
+        data = { "lastName": request.form.get("lastName") }
 
-    @app.route("/register/v/email", methods=["POST"])
+
+        if Validator(token=token).validate_name(target=data["lastName"]):
+            _valid = True
+
+        response = json.dumps({"lastName": { "valid": _valid, "target": data["lastName"] }})
+
+        return response
+
+
+    @app.route("/v/email", methods=["POST"])
     def validate_email():
-        pass
+        _valid = False
+        data = { "email": request.form.get("lastName") }
 
-    @app.route("/register/v/asset-name", methods=["POST"])
+
+        if Validator(token=token).validate_name(target=data["email"]):
+            _valid = True
+
+        response = json.dumps({"email": { "valid": _valid, "target": data["lastName"] }})
+
+        return response
+
+
+    @app.route("/v/asset-name", methods=["POST"])
     def validate_asset_name():
-        pass
+        _valid = False
+        data = { "assetName": request.form.get("assetName") }
 
 
-    @app.route("/register/v/phone-number", methods=["POST"])
+        if Validator(token=token).validate_name(target=data["assetName"]):
+            _valid = True
+
+        response = json.dumps({"assetName": { "valid": _valid, "target": data["assetName"] }})
+
+        return response
+
+
+    @app.route("/v/phone-number", methods=["POST"])
     def validate_phone_number():
-        pass
+        _valid = False
+        data = { "phoneNumber": request.form.get("phoneNumber") }
 
-    @app.route("/register/v/vin", methods=["POST"])
+
+        if Validator(token=token).validate_name(target=data["phoneNumber"]):
+            _valid = True
+
+        response = json.dumps({"phoneNumber": { "valid": _valid, "target": data["phoneNumber"] }})
+
+        return response
+
+
+    @app.route("/v/imei", methods=["POST"])
+    def validate_imei():
+        _valid = False
+        data = { "imei": request.form.get("imei") }
+
+
+        if Validator(token=token).validate_imei(target=data["imei"]):
+            _valid = True
+
+        response = json.dumps({"imei": { "valid": _valid, "target": data["imei"] }})
+
+        return response
+
+
+    @app.route("/v/vin", methods=["POST"])
     def validate_vin():
-        pass
-    """
+        _valid = False
+        data = { "vin": request.form.get("vin") }
+
+
+        if Validator(token=token).validate_name(target=data["vin"]):
+            _valid = True
+
+        response = json.dumps({"vin": { "valid": _valid, "target": data["vin"] }})
+
+        return response
 
 
     return app

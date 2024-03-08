@@ -5,7 +5,8 @@ from auth import Searcher, Session
 
 class Unit:
     def __init__(self, creds: dict, session: Session) -> None:
-        self.search = Searcher(token=session.token)
+        self.session = session
+        self.search = Searcher(token=session._token)
 
         self._imei = creds["imei"]
         self._name = creds["assetName"]
@@ -42,5 +43,6 @@ class Unit:
 
     def rename(self) -> bool:
         params = {"itemId": self.id, "name": self.name}
+
         response = self.session.wialon_api.item_update_name(**params)
         return response["nm"] == self.name
