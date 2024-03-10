@@ -1,7 +1,6 @@
 from auth import Session, Validator
-from client import Unit, User, create_new_form, create_validated_form
+from client import Unit, User, RegistrationForm
 
-from client.formdata import create_validated_form
 from flask import Flask, render_template, request
 
 import dotenv
@@ -16,22 +15,14 @@ def create_app(token: str):
     @app.route("/", methods=["GET", "POST"])
     def register():
         if request.method == "GET":
-            imei = ""
+
+            form = RegistrationForm().create()
+            print(form)
+
             if request.args.get("imei"):
-                imei = request.args.get("imei")
+                pass
 
-            data = create_new_form(
-                firstName = { "valid": None, "target": "" },
-                lastName = { "valid": None, "target": "" },
-                email = { "valid": None, "target": "" },
-                assetName = { "valid": None, "target": "" },
-                phoneNumber = { "valid": None, "target": "" },
-                vin = { "valid": None, "target": "" },
-                imei = { "valid": None, "target": f"{imei}" },
-                testValue = { "valid": None, "target": "" },
-            )
-
-            return render_template("register.html", title="Registration", data=data)
+            return render_template("register.html", title="Registration", data=form)
 
         elif request.method == "POST":
             data = request.form

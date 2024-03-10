@@ -1,19 +1,7 @@
 {% extends 'index.html' %}
 {% block content %}
-    <div class="d-grid m-5">
-        <form action="/" method="post" class="row g-3 needs-validation" novalidate>
-            <div class="row g-2 input-group">
-                <div hx-swap="innerHTML" hx-target="this">
-                    {% include 'partials/validate.html' %}
-                </div>
-                <div class="row g-2">
-                <button type="button"
-                        class="btn btn-secondary"
-                        id="toggle"
-                        onclick="toggleOptionalFields()">Show Options</button>
-                <button type="submit" class="btn btn-primary" id="register">Register</button>
-            </div>
-        </form>
+    <div hx-swap="innerHTML" hx-target="this">
+        {% include 'partials/validate.html' %}
     </div>
     <script src="{{ url_for('static', filename='/main/main.js') }}"</script>
 {% endblock %}

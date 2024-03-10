@@ -1,0 +1,5 @@
+{% block field %}
+{% for field in form %}
+<div hx-swap="innerHTML" hx-target="{{ form.display_name }}">
+</div>
+{% endblock %}

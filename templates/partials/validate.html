@@ -1,62 +1,60 @@
 <div hx-swap="innerHTML" hx-target="this">
     <div class="d-grid m-5">
         <form action="/" method="post" class="row g-3 needs-validation" novalidate>
-            <div class="row g-2 input-group">
-    {% for key, value in data.items() %}
-    <label for="{{ key }}" class="form-label">{{ key }}</label>
-        <input type="text"
-            {% if value["valid"] == None %}
-                class="form-control needs-validation"
-            {% else %}
-                class="form-control needs-validation {{ 'is-valid' if value['valid'] else 'is-invalid' }}"
-            {% endif %}
-            name="{{ key }}"
-            id="{{ key }}"
-            hx-trigger="keyup changed delay:500ms"
-            {% if key == 'firstName' %}
-                placeholder="First"
-                hx-post="/"
-                oninput="updateAssetName()"
-                required
-            >
-            {% elif key == 'lastName' %}
-                placeholder="Last"
-                hx-post="/"
-                required
-            >
-            {% elif key == 'email' %}
-                placeholder="Email"
-                hx-post="/"
-                required
-            >
-            {% elif key == 'assetName' %}
-                placeholder="Email"
-                hx-post="/"
-                oninput="disableAutoUpdate(event)"
-                required
-            >
-            {% elif key == 'phoneNumber' %}
-                placeholder="Phone #"
-                hx-post="/"
-            >
-            {% elif key == 'imei' %}
-                placeholder="IMEI #"
-                hx-post="/"
-                required
-            >
-            {% elif key == 'vin' %}
-                placeholder="VIN #"
-                hx-post="/"
-            >
-            {% elif key == 'testValue' %}
-                placeholder="testValue"
-                hx-post="/"
-            >
-            {% endif %}
-    <div class="invalid-feedback">Invalid {{ key }}.</div>
-    <div class="valid-feedback">Looks good!</div>
-    {% endfor %}
-            </div>
+            {% for key, value in data.items() %}
+                <label for="{{ value['name'] }}" class="form-label">{{ key }}</label>
+                <input type="text"
+                {% if value["valid"] == None %}
+                    class="form-control needs-validation"
+                {% else %}
+                    class="form-control needs-validation {{ 'is-valid' if value['valid'] else 'is-invalid' }}"
+                {% endif %}
+                name="{{ key }}"
+                id="{{ key }}"
+                hx-trigger="keyup changed delay:500ms"
+                {% if key == 'firstName' %}
+                    placeholder="First"
+                    hx-post="/"
+                    oninput="updateAssetName()"
+                    required
+                >
+                {% elif key == 'lastName' %}
+                    placeholder="Last"
+                    hx-post="/"
+                    required
+                >
+                {% elif key == 'email' %}
+                    placeholder="Email"
+                    hx-post="/"
+                    required
+                >
+                {% elif key == 'assetName' %}
+                    placeholder="Email"
+                    hx-post="/"
+                    oninput="disableAutoUpdate(event)"
+                    required
+                >
+                {% elif key == 'phoneNumber' %}
+                    placeholder="Phone #"
+                    hx-post="/"
+                >
+                {% elif key == 'imei' %}
+                    placeholder="IMEI #"
+                    hx-post="/"
+                    required
+                >
+                {% elif key == 'vin' %}
+                    placeholder="VIN #"
+                    hx-post="/"
+                >
+                {% elif key == 'testValue' %}
+                    placeholder="testValue"
+                    hx-post="/"
+                >
+                {% endif %}
+                <div class="invalid-feedback">Invalid {{ key }}.</div>
+                <div class="valid-feedback">Looks good!</div>
+            {% endfor %}
             <div class="row g-2">
                 <button type="button"
                     class="btn btn-secondary"
@@ -64,6 +62,6 @@
                     onclick="toggleOptionalFields()">Show Options</button>
                 <button type="submit" class="btn btn-primary" id="register">Register</button>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>

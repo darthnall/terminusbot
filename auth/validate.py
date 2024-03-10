@@ -18,13 +18,13 @@ class Validator:
 
     def validate_all(self, data: dict[str, str]) -> dict:
         results = {
-            "firstName": { "valid": self.validate_name(target=data["firstName"]), "target": data["firstName"] },
-            "lastName": { "valid": self.validate_name(target=data["lastName"]), "target": data["lastName"] },
-            "email": { "valid": self.validate_email(target=data["email"]), "target": data["email"] },
-            "assetName": { "valid": self.validate_asset_name(target=data["assetName"]), "target": data["assetName"] },
-            "phoneNumber": { "valid": self.validate_phone(target=data["phoneNumber"]), "target": data["phoneNumber"] },
-            "imei": { "valid": self.validate_imei(target=data["imei"]), "target": data["imei"] },
-            "vin": { "valid": self.validate_vin(target=data["vin"]), "target": data["vin"] },
+            "firstName": {"name": "First name", "valid": self.validate_name(target=data["firstName"]), "target": data["firstName"] },
+            "lastName": { "name": "Last name", "valid": self.validate_name(target=data["lastName"]), "target": data["lastName"] },
+            "email": { "name": "Email", "valid": self.validate_email(target=data["email"]), "target": data["email"] },
+            "assetName": { "name": "Asset name", "valid": self.validate_asset_name(target=data["assetName"]), "target": data["assetName"] },
+            "phoneNumber": { "name": "Phone #", "valid": self.validate_phone(target=data["phoneNumber"]), "target": data["phoneNumber"] },
+            "imei": { "name": "IMEI #", "valid": self.validate_imei(target=data["imei"]), "target": data["imei"] },
+            "vin": { "name": "VIN #", "valid": self.validate_vin(target=data["vin"]), "target": data["vin"] },
         }
 
         return results
