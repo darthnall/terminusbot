@@ -1,7 +1,33 @@
 {% extends 'index.html' %}
 {% block content %}
-    <div hx-swap="innerHTML" hx-target="this">
-        {% include 'partials/validate.html' %}
+<form>
+    {% for field in form %}
+        <div hx-swap="innerHTML" hx-target="{{ field.id }}">
+            <label for="{{ field.id }}" class="form-label">{{ field.display_as }}</label>
+            <input
+                class="form-control needs-validation"
+                hx-trigger="keyup changed delay:500ms"
+                type="{{ field.type }}"
+                name="{{ field.id }}"
+                id="{{ field.id }}"
+                placeholder="{{ field.placeholder }}"
+                hx-post="{{ field.validation_endpoint }}"
+                {% if field.on_input %}
+                oninput="{{ field.on_input }}"
+                {% endif %}
+                {% if field.required %}
+                required
+                {% endif %}
+            >
+        </div>
+    {% endfor %}
+    <div class="row g-2">
+        <button type="button"
+            class="btn btn-secondary"
+            id="toggle"
+            onclick="toggleOptionalFields()">Show Options</button>
+        <button type="submit" class="btn btn-primary" id="register">Register</button>
     </div>
-    <script src="{{ url_for('static', filename='/main/main.js') }}"</script>
+</form>
+        <script src="{{ url_for('static', filename='main/main.js') }}">
 {% endblock %}

@@ -1,39 +1,86 @@
 from auth import Session, Validator
-from client import Unit, User, RegistrationForm
+from client import Unit, User
+from client.form import Field
 
 from flask import Flask, render_template, request
 
 import dotenv
-import json
 import os
 
 
 def create_app(token: str):
     app = Flask(__name__)
 
+    form = [
+        Field(
+            "firstName",
+            "First Name",
+            placeholder="First",
+            validation_endpoint="/v/first-name",
+            on_input="updateAssetName()",
+        ),
+        Field(
+            "lastName",
+            "Last Name",
+            placeholder="Last",
+            validation_endpoint="/v/last-name",
+        ),
+        Field(
+            "assetName",
+            "Asset Name",
+            placeholder="Asset",
+            validation_endpoint="/v/asset-name",
+            on_input="disableAutoUpdate()"
+        ),
+        Field(
+            "email",
+            "Email",
+            placeholder="Email",
+            validation_endpoint="/v/email",
+            type="email"
+        ),
+        Field(
+            "phoneNumber",
+            "Phone #",
+            placeholder="Phone",
+            validation_endpoint="/v/phone-number",
+            required=False,
+        ),
+        Field(
+            "vinNumber",
+            "VIN #",
+            placeholder="VIN",
+            validation_endpoint="/v/vin-number",
+            required=False,
+        ),
+        Field(
+            "imeiNumber",
+            "IMEI #",
+            placeholder="IMEI",
+            validation_endpoint="/v/imei-number",
+            required=True,
+        )
+    ]
+
 
     @app.route("/", methods=["GET", "POST"])
     def register():
         if request.method == "GET":
 
-            form = RegistrationForm().create()
-            print(form)
-
             if request.args.get("imei"):
-                pass
+                form[-1].user_input = request.args.get("imei")
 
-            return render_template("register.html", title="Registration", data=form)
+            return render_template("register.html", title="Registration", form=form)
 
         elif request.method == "POST":
             data = request.form
-            page = "register.html"
 
             # Handle validation
             validation_results = Validator(token=token).validate_all(data=data)
             bad_items = [key for key, value in validation_results.items() if value is not True]
             print(f"{ data = }")
             if bad_items:
-                return render_template("register.html", title="Invalid", data=data)
+                return render_template("register.html", title="Invalid Form", form=form)
 
             # Open session > Create the user > Add unit to user > email credentials
             with Session(token=token) as session:
@@ -44,143 +91,116 @@ def create_app(token: str):
                 )
 
                 unit = Unit(creds=user.creds, session=session)
-                response = unit.assign(user_id=user.creds["userId"])
+                unit.assign(user_id=user.creds["userId"])
 
 
             if user.email_creds():
                 print(f"Credentials emailed to {user.creds['email']}")
 
-            if not isinstance(response, dict):
-                page = "response.raw.html"
+            return render_template("register.html", form=form, success=True)
 
-            return render_template(
-                page, response=response, title="Response", redirect="register"
-            )
         else:
             return "404"
-
-    @app.route("/v/test-value", methods=["POST"])
-    def validate_test_value():
-        _valid = False
-        data = { "testValue": request.form.get("testValue") }
-
-
-        if Validator(token=token).validate_test(target=data["testValue"]):
-            _valid = True
-
-        response = json.dumps({
-            "testValue": {
-                "valid": _valid,
-                "target": data["testValue"]
-            }
-        }), 200, {"Content-Type": "application/json"}
-
-        return response
-
-
     @app.route("/v/first-name", methods=["POST"])
     def validate_first_name():
         _valid = False
-        data = { "firstName": request.form.get("firstName") }
+        _input = request.form.get("firstName")
 
-
-        if Validator(token=token).validate_name(target=data["firstName"]):
+        if Validator(token=token).validate_name(target=_input):
             _valid = True
 
-        response = json.dumps({
-            "firstName": {
-                "valid": _valid,
-                "target": data["firstName"]
-            }
-        }), 200, {"Content-Type": "application/json"}
+        form[0].validation_result = _valid
+        form[0].user_input = _input
 
-        # TODO: Add logging
-
-        return response
+        return render_template("partials/field.html", title="Register", form=form)
 
 
     @app.route("/v/last-name", methods=["POST"])
     def validate_last_name():
         _valid = False
-        data = { "lastName": request.form.get("lastName") }
+        _input = request.form.get("lastName")
 
-
-        if Validator(token=token).validate_name(target=data["lastName"]):
+        if Validator(token=token).validate_name(target=_input):
             _valid = True
 
-        response = json.dumps({"lastName": { "valid": _valid, "target": data["lastName"] }})
+        form[1].validation_result = _valid
+        form[1].user_input = _input
 
-        return response
+        return render_template("partials/field.html", title="Register", form=form)
 
 
     @app.route("/v/email", methods=["POST"])
     def validate_email():
         _valid = False
-        data = { "email": request.form.get("lastName") }
+        _input = request.form.get("lastName")
 
-
-        if Validator(token=token).validate_name(target=data["email"]):
+        if Validator(token=token).validate_name(target=_input):
             _valid = True
 
-        response = json.dumps({"email": { "valid": _valid, "target": data["lastName"] }})
+        form[2].validation_result = _valid
+        form[2].user_input = _input
 
-        return response
+        return render_template("partials/field.html", title="Register", form=form)
 
 
     @app.route("/v/asset-name", methods=["POST"])
     def validate_asset_name():
         _valid = False
-        data = { "assetName": request.form.get("assetName") }
+        _input = request.form.get("assetName")
 
 
-        if Validator(token=token).validate_name(target=data["assetName"]):
+        if Validator(token=token).validate_name(target=_input):
             _valid = True
 
-        response = json.dumps({"assetName": { "valid": _valid, "target": data["assetName"] }})
+        form[3].validation_result = _valid
+        form[3].user_input = _input
 
-        return response
+        return render_template("partials/field.html", form=form)
 
 
     @app.route("/v/phone-number", methods=["POST"])
     def validate_phone_number():
         _valid = False
-        data = { "phoneNumber": request.form.get("phoneNumber") }
+        _input = request.form.get("phoneNumber")
 
 
-        if Validator(token=token).validate_name(target=data["phoneNumber"]):
+        if Validator(token=token).validate_name(target=_input):
             _valid = True
 
-        response = json.dumps({"phoneNumber": { "valid": _valid, "target": data["phoneNumber"] }})
 
-        return response
+        form[4].validation_result = _valid
+        form[4].user_input = _input
 
+        return render_template("partials/field.html", title="Register", form=form)
 
-    @app.route("/v/imei", methods=["POST"])
+    @app.route("/v/imei-number", methods=["POST"])
     def validate_imei():
         _valid = False
-        data = { "imei": request.form.get("imei") }
+        _input = request.form.get("imeiNumber")
 
 
-        if Validator(token=token).validate_imei(target=data["imei"]):
+        if Validator(token=token).validate_imei(target=_input):
             _valid = True
 
-        response = json.dumps({"imei": { "valid": _valid, "target": data["imei"] }})
+        form[5].validation_result = _valid
+        form[5].user_input = _input
 
-        return response
+        return render_template("partials/field.html", title="Register", form=form)
 
 
-    @app.route("/v/vin", methods=["POST"])
+    @app.route("/v/vin-number", methods=["POST"])
     def validate_vin():
         _valid = False
-        data = { "vin": request.form.get("vin") }
+        _input = request.form.get("vinNumber")
 
 
-        if Validator(token=token).validate_name(target=data["vin"]):
+        if Validator(token=token).validate_name(target=_input):
             _valid = True
 
-        response = json.dumps({"vin": { "valid": _valid, "target": data["vin"] }})
+        form[6].validation_result = _valid
+        form[6].user_input = _input
 
-        return response
+        return render_template("partials/field.html", title="Register", form=form)
 
 
     return app
