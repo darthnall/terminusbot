@@ -2,7 +2,7 @@
 {% block content %}
 <form>
     {% for field in form %}
-        <div hx-swap="innerHTML" hx-target="{{ field.id }}">
+        <div hx-swap="innerHTML" hx-target="this">
             <label for="{{ field.id }}" class="form-label">{{ field.display_as }}</label>
             <input
                 class="form-control needs-validation"
@@ -29,5 +29,4 @@
         <button type="submit" class="btn btn-primary" id="register">Register</button>
     </div>
 </form>
-        <script src="{{ url_for('static', filename='main/main.js') }}">
 {% endblock %}

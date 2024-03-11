@@ -81,7 +81,7 @@ class Validator:
             if addr[0].lower().isalnum() and addr[1].endswith(valid_endings):
                 print(f"`{target = }...OK`")
                 _valid = True
-        except AttributeError:
+        except AttributeError or IndexError:
             _valid = False
         return _valid
 
