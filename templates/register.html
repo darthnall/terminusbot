@@ -1,32 +1,49 @@
 {% extends 'index.html' %}
 {% block content %}
+{% if success == True %}
+<div class="alert alert-success" role="alert">
+    User `{{ form['email'] }}` created successfully! Check your email for your new credentials.
+</div>
+{% elif success == False %}
+<div class="alert alert-danger" role="alert">
+    Failed to register new user. Please adjust input and try again.
+</div>
+{% else %}
+{% endif %}
 <form>
-    {% for field in form %}
-        <div hx-swap="innerHTML" hx-target="this">
-            <label for="{{ field.id }}" class="form-label">{{ field.display_as }}</label>
-            <input
-                class="form-control needs-validation"
-                hx-trigger="keyup changed delay:500ms"
-                type="{{ field.type }}"
-                name="{{ field.id }}"
-                id="{{ field.id }}"
-                placeholder="{{ field.placeholder }}"
-                hx-post="{{ field.validation_endpoint }}"
-                {% if field.on_input %}
-                oninput="{{ field.on_input }}"
-                {% endif %}
-                {% if field.required %}
-                required
-                {% endif %}
-            >
+    <div class="container-fluid custom">
+        {% for id, field in form.items() %}
+            <div class="col {% if field.starts_hidden %}d-none{% endif %}">
+                <div hx-swap="innerHTML" hx-target="this">
+                    <label for="{{ id }}" class="form-label">{{ field.display_as }}</label>
+                    <input
+                    class="form-control needs-validation "
+                        hx-trigger="blur"
+                        type="{{ field.type }}"
+                        name="{{ id }}"
+                        id="{{ id }}"
+                        placeholder="{{ field.placeholder }}"
+                        hx-post="{{ field.validation_endpoint }}"
+                        {% if field.user_input %}
+                        value={{ field.user_input }}
+                        {% endif %}
+                        {% if field.on_input %}
+                        oninput="{{ field.on_input }}"
+                        {% endif %}
+                        {% if field.required %}
+                        required
+                        {% endif %}
+                    >
+                </div>
+            </div>
+        {% endfor %}
+        <div class="row g-2">
+            <button type="button"
+                class="btn btn-secondary"
+                id="toggle"
+                onclick="toggleOptionalFields()">Show Options</button>
+            <button type="submit" class="btn btn-primary" id="register">Register</button>
         </div>
-    {% endfor %}
-    <div class="row g-2">
-        <button type="button"
-            class="btn btn-secondary"
-            id="toggle"
-            onclick="toggleOptionalFields()">Show Options</button>
-        <button type="submit" class="btn btn-primary" id="register">Register</button>
     </div>
 </form>
 {% endblock %}

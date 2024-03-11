@@ -50,3 +50,26 @@ class Searcher:
                 __id = None
 
         return __id
+
+    def unit_was_previously_assigned(self, imei: str) -> bool:
+        unit_exists = True
+        params = {
+            "spec": {
+                "itemsType": "avl_unit",
+                "propName": "sys_name",
+                "propValueMask": imei,
+                "sortType": "sys_name",
+            },
+            "force": 1,
+            "flags": 1,
+            "from": 0,
+            "to": 0,
+        }
+        with Session(token=self._token) as session:
+            response = session.wialon_api.core_search_items(**params)
+            if response["totalItemCount"] == 0:
+                unit_exists = False
+            else:
+                unit_exists = True
+
+        return unit_exists

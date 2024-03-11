@@ -1,40 +1,53 @@
 from auth import Session, Validator
 from client import Unit, User
-from client.form import create_registration_form
+from client.form import create_registration_form, Field
 
 from flask import Flask, render_template, request
+from flask import session as flask_session
 
 import dotenv
 import os
+from uuid import UUID, uuid4
 
 
-def create_app(token: str):
+def create_app(token: str, secret_key: UUID):
     app = Flask(__name__)
-
-    form = create_registration_form()
+    app.secret_key = str(secret_key)
+    app.config['SESSION_TYPE'] = 'filesystem'
 
     @app.route("/", methods=["GET", "POST"])
     def register():
         if request.method == "GET":
-            form[-1].user_input = request.args.get("imei")
+
+            form = create_registration_form()
+            flask_session['REGISTRATION_FORM'] = form
+
+            form["imeiNumber"].user_input = request.args.get("imei")
 
             return render_template("register.html", title="Registration", form=form)
 
         elif request.method == "POST":
+            form = flask_session['REGISTRATION_FORM']
+            success = False
             data = request.form
-            bad_data = validate(Validator(token=token), data=data)
 
-            if bad_data:
-                success = False
+            form = Validator(token=token).validate_all(form=form)
 
-            with Session(token=token) as session:
-                user = User(data=data, session=session)
-                user.create(name=user.creds["email"], password=user.creds["password"])
+            for field in form.values():
+                if field.validation_result is False or None:
+                    success = False
+                    break
+                else:
+                    with Session(token=token) as session:
+                        user = User(data=data, session=session)
+                        user.create(name=user.creds["email"], password=user.creds["password"])
 
-                unit = Unit(creds=user.creds, session=session)
-                unit.assign(user_id=user.creds["userId"])
+                        unit = Unit(creds=user.creds, session=session)
+                        unit.assign(user_id=user.creds["userId"])
 
-                user.email_creds()
+                        user.email_creds()
+
+                        success = True
 
             return render_template("register.html", form=form, success=success)
 
@@ -43,106 +56,148 @@ def create_app(token: str):
 
     @app.route("/v/first-name", methods=["POST"])
     def validate_first_name():
+        field = flask_session['REGISTRATION_FORM']["firstName"]
         _valid = False
         _input = request.form.get("firstName")
 
-        if Validator(token=token).validate_name(target=_input):
-            _valid = True
+        _valid, _msg = Validator(token=token).validate_name(target=_input)
 
-        form[0].validation_result = _valid
-        form[0].user_input = _input
+        update_field(
+            field=field,
+            data=(
+                _valid,
+                _msg,
+                _input
+            )
+        )
 
-        return render_template("partials/field.html", title="Register", field=form[0])
+        return render_template("partials/field.html", title="Register", field=field)
 
     @app.route("/v/last-name", methods=["POST"])
     def validate_last_name():
+        field = flask_session['REGISTRATION_FORM']["lastName"]
         _valid = False
         _input = request.form.get("lastName")
 
-        if Validator(token=token).validate_name(target=_input):
-            _valid = True
+        _valid, _msg = Validator(token=token).validate_name(target=_input)
 
-        form[1].validation_result = _valid
-        form[1].user_input = _input
+        update_field(
+            field=field,
+            data=(
+                _valid,
+                _msg,
+                _input
+            )
+        )
 
-        return render_template("partials/field.html", title="Register", field=form[1])
+        return render_template("partials/field.html", title="Register", field=field)
 
     @app.route("/v/email", methods=["POST"])
     def validate_email():
+        field = flask_session['REGISTRATION_FORM']["email"]
         _valid = False
-        _input = request.form.get("lastName")
+        _input = request.form.get("email")
 
-        if Validator(token=token).validate_email(target=_input):
-            _valid = True
+        _valid, _msg = Validator(token=token).validate_email(target=_input)
 
-        form[2].validation_result = _valid
-        form[2].user_input = _input
+        update_field(
+            field=field,
+            data=(
+                _valid,
+                _msg,
+                _input
+            )
+        )
 
-        return render_template("partials/field.html", title="Register", field=form[2])
+        return render_template("partials/field.html", title="Register", field=field)
 
     @app.route("/v/asset-name", methods=["POST"])
     def validate_asset_name():
+        field = flask_session['REGISTRATION_FORM']["assetName"]
         _valid = False
         _input = request.form.get("assetName")
 
-        if Validator(token=token).validate_asset_name(target=_input):
-            _valid = True
+        _valid, _msg = Validator(token=token).validate_asset_name(target=_input)
 
-        form[3].validation_result = _valid
-        form[3].user_input = _input
+        update_field(
+            field=field,
+            data=(
+                _valid,
+                _msg,
+                _input
+            )
+        )
 
-        return render_template("partials/field.html", field=form[3])
+        return render_template("partials/field.html", title="Register", field=field)
 
     @app.route("/v/phone-number", methods=["POST"])
     def validate_phone_number():
+        field = flask_session['REGISTRATION_FORM']["phoneNumber"]
         _valid = False
         _input = request.form.get("phoneNumber")
 
-        if Validator(token=token).validate_name(target=_input):
-            _valid = True
+        _valid, _msg = Validator(token=token).validate_phone_number(target=_input)
 
-        form[4].validation_result = _valid
-        form[4].user_input = _input
+        update_field(
+            field=field,
+            data=(
+                _valid,
+                _msg,
+                _input
+            )
+        )
 
-        return render_template("partials/field.html", title="Register", field=form[4])
+        return render_template("partials/field.html", title="Register", field=field)
 
     @app.route("/v/imei-number", methods=["POST"])
     def validate_imei():
+        field = flask_session['REGISTRATION_FORM']["imeiNumber"]
         _valid = False
         _input = request.form.get("imeiNumber")
 
-        if Validator(token=token).validate_imei(target=_input):
-            _valid = True
+        _valid, _msg = Validator(token=token).validate_imei_number(target=_input)
 
-        form[5].validation_result = _valid
-        form[5].user_input = _input
+        update_field(
+            field=field,
+            data=(
+                _valid,
+                _msg,
+                _input
+            )
+        )
 
-        return render_template("partials/field.html", title="Register", field=form[5])
+        return render_template("partials/field.html", title="Register", field=field)
 
     @app.route("/v/vin-number", methods=["POST"])
     def validate_vin():
+        field = flask_session['REGISTRATION_FORM']["vinNumber"]
         _valid = False
         _input = request.form.get("vinNumber")
 
-        if Validator(token=token).validate_name(target=_input):
-            _valid = True
+        _valid, _msg = Validator(token=token).validate_vin_number(target=_input)
 
-        form[6].validation_result = _valid
-        form[6].user_input = _input
+        update_field(
+            field=field,
+            data=(
+                _valid,
+                _msg,
+                _input
+            )
+        )
 
-        return render_template("partials/field.html", title="Register", field=form[6])
+        return render_template("partials/field.html", title="Register", field=field)
+
 
     return app
 
 
-def validate(validator: Validator, data: dict) -> list[str | None]:
-    results = validator.validate_all(data=data)
-    bad_items = [key for key, value in results.items() if value is not True]
-    return bad_items
-
+def update_field(field: dict, data: tuple[bool, str, str | None]) -> None:
+    field["validation_result"] = data[0]
+    field["validation_msg"] = data[1]
+    field["user_input"] = data[2]
 
 if __name__ == "__main__":
     dotenv.load_dotenv()
     token = os.environ["WIALON_HOSTING_API_TOKEN_DEV"]
-    app = create_app(token=token)
+    app = create_app(token=token, secret_key=uuid4())
     app.run(debug=True)

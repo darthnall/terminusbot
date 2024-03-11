@@ -115,6 +115,7 @@ class User:
         return email.send(to_addr=to_addr)
 
     def assign_phone(self, user_id: int, phone_number: int) -> bool:
+        _success = False
         """
         Assign a phone number to a user.
 
@@ -141,12 +142,23 @@ class User:
             num = phone_number
 
         # Update the user's phone number using Wialon API
-        params = {"itemId": item_id, "phoneNumber": num}
+        params = {
+            "itemId": item_id,
+            "callMode": "create",
+            "n": "phoneNumber",
+            "v": num,
+        }
 
         # NOTE: The Wialon API returns empty dict on success
-        _success = self.session.wialon_api.unit_update_phone(**params)
+        response = self.session.wialon_api.item_update_custom_field(**params)
 
-        return bool(_success)
+        try:
+            response["id"]
+            _success = True
+        except KeyError:
+            _success = False
+
+        return _success
 
     def generate_password(self, length: int) -> str:
         """

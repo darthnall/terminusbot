@@ -15,3 +15,10 @@
     required
     {% endif %}
 >
+{% if field.validation_msg %}
+    {% if field.validation_result == True %}
+        <div class="valid-feedback">{{ field.validation_msg }}</div>
+    {% else %}
+        <div class="invalid-feedback">{{ field.validation_msg }}</div>
+    {% endif %}
+{% endif %}

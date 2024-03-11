@@ -17,12 +17,15 @@ function disableAutoUpdate(event) {
 }
 
 function toggleOptionalFields() {
-  let optionalFields = document.getElementById("optionalFields");
-  if (optionalFields.classList.contains("d-none")) {
+  let phoneNumber = document.getElementById("phoneNumber");
+  let vinNumber = document.getElementById("vinNumber");
+if (phoneNumber.classList.contains("d-none")) && vinNumber.classList.contains("d-none") {
     toggleButton.innerText = "Hide Options";
-    optionalFields.classList.toggle("d-none");
+    phoneNumber.classList.add("d-none");
+    vinNumber.classList.add("d-none");
   } else {
     toggleButton.innerText = "Show Options";
-    optionalFields.classList.toggle("d-none");
+    phoneNumber.classList.remove("d-none");
+    vinNumber.classList.remove("d-none");
   }
 }

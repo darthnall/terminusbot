@@ -1,10 +1,12 @@
 label {
   padding-top: 1em;
   padding-bottom: .5em;
+  color: #ffffff;
 }
 body {
   background-color: #700000;
 }
+.container { background-color: #ffffff; }
 .btn-primary {
   background-color: #722222;
   border-color: #ffffff;
@@ -18,7 +20,7 @@ body {
   border-color: #ffffff;
 }
 .d-grid {
-  background-color: #ffffff;
+  background-color: #000000;
   padding: 1em;
   border-radius: 6px;
 }
@@ -26,3 +28,4 @@ body {
   padding-left: 1em;
   padding-right: 1em;
 }
+.custom { positon: relative; }
