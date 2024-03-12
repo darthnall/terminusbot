@@ -2,20 +2,27 @@
 {% block content %}
 {% if success == True %}
 <div class="alert alert-success" role="alert">
-    User `{{ form['email'] }}` created successfully! Check your email for your new credentials.
+    User created successfully! Check your email for your new credentials.
 </div>
 {% elif success == False %}
 <div class="alert alert-danger" role="alert">
-    Failed to register new user. Please adjust input and try again.
+    Failed to register new user. Please adjust the following inputs and try again:
+    {% for item in bad_items %}
+    <ul>
+        <li>{{ item }}</li>
+    </ul>
+    {% endfor %}
 </div>
-{% else %}
 {% endif %}
-<form>
-    <div class="container">
+<form action="/" method="post">
+    <div class="container-fluid">
         {% for id, field in form.items() %}
-            <div class="mb-auto row{% if field.starts_hidden %} d-none{% endif %}">
-                <div class="col-md" hx-swap="innerHTML" hx-target="this">
+            <div class="row mb-4 justify-content-start{% if field.starts_hidden %} d-none{% endif %}">
+                <div hx-swap="innerHTML" hx-target="this">
+                <div class="col-md">
                     <label for="{{ id }}" class="form-label">{{ field.display_as }}{% if field.required %}<span style="color: red; font-weight: bold;"><i> *Required</i></span>{% endif %}</label>
+                </div>
+                <div style="position: relative;" class="col-md">
                     <input
                     class="form-control needs-validation"
                         hx-trigger="blur"
@@ -36,6 +43,7 @@
                     <div class="invalid-tooltip">{{ field.validation_msg }}</div>
                 {% endif %}
             {% endif %}
+                </div>
                 </div>
             </div>
         {% endfor %}

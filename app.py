@@ -29,12 +29,13 @@ def create_app(token: str, secret_key: UUID):
         elif request.method == "POST":
             form = flask_session['REGISTRATION_FORM']
             data = request.form
+            success = False
 
-            form, bad_items = Validator(token=token).validate_all(form=form)
+            bad_items = Validator(token=token).validate_all(data=data)
 
-            if bad_items:
-                success = False
-            else:
+            print(f"{bad_items = }")
+
+            if not bad_items:
                 success = True
 
             if success:
@@ -47,7 +48,7 @@ def create_app(token: str, secret_key: UUID):
 
                     user.email_creds()
 
-            return render_template("register.html", form=form, success=success)
+            return render_template("register.html", form=form, success=success, bad_items=bad_items)
 
         else:
             return "404"

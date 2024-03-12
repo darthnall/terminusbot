@@ -19,31 +19,32 @@ class Validator:
 
         return has_banned_character
 
-    def validate_all(self, form: dict[str, Field]):
-        bad_items: list[str] = []
-        for id, field in form.items():
-            valid, msg = False, f"Invalid input {field.user_input}"
-            if id == "firstName":
-                valid, msg = self.validate_name(target=field.user_input)
-            if id == "lastName":
-                valid, msg = self.validate_name(target=field.user_input)
-            if id == "email":
-                valid, msg = self.validate_email(target=field.user_input)
-            if id == "assetName":
-                valid, msg = self.validate_asset_name(target=field.user_input)
-            if id == "imeiNumber":
-                valid, msg = self.validate_imei_number(target=field.user_input)
-            if id == "phoneNumber":
-                valid, msg = self.validate_phone_number(target=field.user_input)
-            if id == "vinNumber":
-                valid, msg = self.validate_vin_number(target=field.user_input)
-            field.is_valid = valid
-            field.validation_msg = msg
+    def validate_all(self, data: dict[str, str]) -> list[str | None]:
+        bad_items: list[str | None] = []
+        for id, target in data.items():
+            valid: bool
+            match id:
+                case "firstName":
+                    valid = self.validate_name(target=target)[0]
+                case "lastName":
+                    valid = self.validate_name(target=target)[0]
+                case "email":
+                    valid = self.validate_email(target=target)[0]
+                case "assetName":
+                    valid = self.validate_asset_name(target=target)[0]
+                case "imeiNumber":
+                    valid = self.validate_imei_number(target=target)[0]
+                case "phoneNumber":
+                    valid = self.validate_phone_number(target=target)[0]
+                case "vinNumber":
+                    valid = self.validate_vin_number(target=target)[0]
+                case _:
+                    valid = False
 
             if not valid:
                 bad_items.append(id)
 
-        return form, bad_items
+        return bad_items
 
     def validate_name(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
@@ -51,11 +52,11 @@ class Validator:
         match target:
             case "" | None:
                 _valid, msg = False, "Please input a name."
-            case target if self._has_banned_character(target=target) == True:
-                _valid, msg = False, f"Name contains invalid character."
+            case target if self._has_banned_character(target=target):
+                _valid, msg = False, "Name contains invalid character."
             case target if not target.lower().isalpha():
                 _valid, msg = False, "Name can only contain letters."
-            case target if target.lower().isalpha():
+            case _:
                 _valid, msg = True, "Looks good!"
 
         return _valid, msg
@@ -68,9 +69,9 @@ class Validator:
                 _valid, msg = False, "Please input a name for your new asset."
             case target if len(target) > 60:
                 _valid, msg = False, f"Name must be under 60 characters. Input was {len(target)} characters."
-            case target if self._has_banned_character(target=target) == True:
-                _valid, msg = False, f"Name contains invalid character."
-            case target if len(target) <= 60 and target != "" and target is not None:
+            case target if self._has_banned_character(target=target):
+                _valid, msg = False, "Name contains invalid character."
+            case _:
                 _valid, msg = True, "Looks good!"
 
         return _valid, msg
@@ -93,7 +94,7 @@ class Validator:
                 _valid, msg = False, "Please input your email address."
             case target if len(target) > 60:
                 _valid, msg = False, f"Email must be less than 60 characters. Length: {len(target)}"
-            case target if len(target) <= 60 and target != "" and target is not None:
+            case _:
                 addr = target.split("@")
                 if addr[1].endswith(valid_endings):
                     _valid, msg = True, "Looks good!"
@@ -109,10 +110,10 @@ class Validator:
             case "" | None:
                 _valid, msg = False, "Please input a phone number."
             case target if target.isdigit() is False:
-                _valid, msg = False, f"Phone # must be digits only."
+                _valid, msg = False, "Phone # must be digits only."
             case target if len(target) > 15:
                 _valid, msg = False, f"Phone number must be less than 15 characters. Length: {len(target)}"
-            case target if len(target) <= 15 and target != "" and target is not None:
+            case _:
                 _valid, msg = True, "Looks good!"
 
         return _valid, msg
@@ -125,10 +126,10 @@ class Validator:
             case "" | None:
                 _valid, msg = False, "Please input your IMEI #."
             case target if target.isdigit() is False:
-                _valid, msg = False, f"IMEI # must be digits only."
+                _valid, msg = False, "IMEI # must be digits only."
             case target if len(target) != 15:
                 _valid, msg = False, f"IMEI # must be exactly 15 characters. Length: {len(target)}"
-            case target:
+            case _:
                 if search.unit_was_previously_assigned(imei=target):
                     if search.by_imei(imei=target):
                         _valid, msg = True, "Looks good!"
