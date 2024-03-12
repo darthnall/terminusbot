@@ -1,12 +1,6 @@
-label {
-  padding-top: 1em;
-  padding-bottom: .5em;
-  color: #ffffff;
-}
 body {
   background-color: #700000;
 }
-.container { background-color: #ffffff; }
 .btn-primary {
   background-color: #722222;
   border-color: #ffffff;
@@ -19,13 +13,12 @@ body {
   background-color: #700000;
   border-color: #ffffff;
 }
-.d-grid {
-  background-color: #000000;
-  padding: 1em;
-  border-radius: 6px;
+
+.col {
+  position: relative;
 }
-.col-md {
-  padding-left: 1em;
-  padding-right: 1em;
+
+.tooltip { opacity: 45%; }
+.container {
+  background-color: #3A3531;
 }
-.custom { positon: relative; }

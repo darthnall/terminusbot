@@ -19,7 +19,8 @@ class Validator:
 
         return has_banned_character
 
-    def validate_all(self, form: dict[str, Field]) -> dict[str, Field]:
+    def validate_all(self, form: dict[str, Field]):
+        bad_items: list[str] = []
         for id, field in form.items():
             valid, msg = False, f"Invalid input {field.user_input}"
             if id == "firstName":
@@ -36,10 +37,13 @@ class Validator:
                 valid, msg = self.validate_phone_number(target=field.user_input)
             if id == "vinNumber":
                 valid, msg = self.validate_vin_number(target=field.user_input)
-            field.validation_result = valid
+            field.is_valid = valid
             field.validation_msg = msg
 
-        return form
+            if not valid:
+                bad_items.append(id)
+
+        return form, bad_items
 
     def validate_name(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
@@ -115,6 +119,7 @@ class Validator:
 
     def validate_imei_number(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
+        search = Searcher(token=self._token)
 
         match target:
             case "" | None:
@@ -123,15 +128,15 @@ class Validator:
                 _valid, msg = False, f"IMEI # must be digits only."
             case target if len(target) != 15:
                 _valid, msg = False, f"IMEI # must be exactly 15 characters. Length: {len(target)}"
-            case target if len(target) == 15 and target != "" and target is not None:
-                search = Searcher(token=self._token)
+            case target:
                 if search.unit_was_previously_assigned(imei=target):
-                    _valid, msg = False, "Invalid unit. support@terminusgps.com has been notified of this error."
-                    # TODO: Email myself this error.
                     if search.by_imei(imei=target):
                         _valid, msg = True, "Looks good!"
+                    else:
+                        _valid, msg = False, "Couldn't find associated unit. Try again or call if issue persists."
                 else:
-                    _valid, msg = False, "Couldn't find associated unit. Try again or call if issue persists."
+                    _valid, msg = False, "Invalid unit. support@terminusgps.com has been notified of this error."
+                    # TODO: Email myself this error.
 
         return _valid, msg
 

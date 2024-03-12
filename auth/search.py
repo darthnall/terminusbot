@@ -1,5 +1,7 @@
 from . import Session
 
+from functools import cache
+
 
 class Searcher:
     """
@@ -43,16 +45,14 @@ class Searcher:
         # Open a session and search for the item
         with Session(token=self._token) as session:
             response = session.wialon_api.core_search_items(**params)
-            try:
-                __id = int(response["items"][0]["id"])
-            except IndexError:
-                print(f"IndexError: {response = }")
-                __id = None
+            print(response)
+            __id = int(response["items"][0]["id"])
 
         return __id
 
+    @cache
     def unit_was_previously_assigned(self, imei: str) -> bool:
-        unit_exists = True
+        unit_is_available = False
         params = {
             "spec": {
                 "itemsType": "avl_unit",
@@ -67,9 +67,11 @@ class Searcher:
         }
         with Session(token=self._token) as session:
             response = session.wialon_api.core_search_items(**params)
-            if response["totalItemCount"] == 0:
-                unit_exists = False
+            if response["totalItemsCount"] == 0:
+                unit_is_available = False
+            elif response["items"][0]["nm"] == imei:
+                unit_is_available = True
             else:
-                unit_exists = True
+                unit_is_available = False
 
-        return unit_exists
+        return unit_is_available

@@ -1,6 +1,6 @@
-<label for="{{ field.id }}" class="form-label">{{ field.display_as }}</label>
+<label for="{{ id }}" class="col-form-label">{{ field.display_as }}{% if field.required %}<span style="color: red; font-weight: bold;"><i> *Required</i></span>{% endif %}</label>
 <input
-    class="form-control needs-validation {% if field.validation_result is true %}is-valid{% else %}is-invalid{% endif %}"
+    class="form-control needs-validation {% if field.is_valid %}is-valid{% else %}is-invalid{% endif %}"
     hx-trigger="keyup changed delay:500ms"
     type="{{ field.type }}"
     name="{{ field.id }}"
@@ -16,9 +16,9 @@
     {% endif %}
 >
 {% if field.validation_msg %}
-    {% if field.validation_result == True %}
-        <div class="valid-feedback">{{ field.validation_msg }}</div>
+    {% if field.is_valid %}
+        <div class="valid-tooltip">{{ field.validation_msg }}</div>
     {% else %}
-        <div class="invalid-feedback">{{ field.validation_msg }}</div>
+        <div class="invalid-tooltip">{{ field.validation_msg }}</div>
     {% endif %}
 {% endif %}

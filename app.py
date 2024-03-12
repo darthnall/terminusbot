@@ -28,26 +28,24 @@ def create_app(token: str, secret_key: UUID):
 
         elif request.method == "POST":
             form = flask_session['REGISTRATION_FORM']
-            success = False
             data = request.form
 
-            form = Validator(token=token).validate_all(form=form)
+            form, bad_items = Validator(token=token).validate_all(form=form)
 
-            for field in form.values():
-                if field.validation_result is False or None:
-                    success = False
-                    break
-                else:
-                    with Session(token=token) as session:
-                        user = User(data=data, session=session)
-                        user.create(name=user.creds["email"], password=user.creds["password"])
+            if bad_items:
+                success = False
+            else:
+                success = True
 
-                        unit = Unit(creds=user.creds, session=session)
-                        unit.assign(user_id=user.creds["userId"])
+            if success:
+                with Session(token=token) as session:
+                    user = User(data=data, session=session)
+                    user.create(name=user.creds["email"], password=user.creds["password"])
 
-                        user.email_creds()
+                    unit = Unit(creds=user.creds, session=session)
+                    unit.assign(user_id=user.creds["userId"])
 
-                        success = True
+                    user.email_creds()
 
             return render_template("register.html", form=form, success=success)
 
@@ -61,6 +59,8 @@ def create_app(token: str, secret_key: UUID):
         _input = request.form.get("firstName")
 
         _valid, _msg = Validator(token=token).validate_name(target=_input)
+
+        print(f"{_valid = } {_msg = } {_input = }")
 
         update_field(
             field=field,
@@ -81,6 +81,8 @@ def create_app(token: str, secret_key: UUID):
 
         _valid, _msg = Validator(token=token).validate_name(target=_input)
 
+        print(f"{_valid = } {_msg = } {_input = }")
+
         update_field(
             field=field,
             data=(
@@ -99,6 +101,8 @@ def create_app(token: str, secret_key: UUID):
         _input = request.form.get("email")
 
         _valid, _msg = Validator(token=token).validate_email(target=_input)
+
+        print(f"{_valid = } {_msg = } {_input = }")
 
         update_field(
             field=field,
@@ -192,7 +196,7 @@ def create_app(token: str, secret_key: UUID):
 
 
 def update_field(field: dict, data: tuple[bool, str, str | None]) -> None:
-    field["validation_result"] = data[0]
+    field["is_valid"] = data[0]
     field["validation_msg"] = data[1]
     field["user_input"] = data[2]
 
