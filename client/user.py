@@ -111,8 +111,8 @@ class User:
         if creds is not None:
             self.creds = creds
         to_addr = self.creds["email"]
-        email = EmailUser(creds=self.creds)
-        return email.send(to_addr=to_addr)
+        email = EmailUser()
+        return email.send(to_addr=to_addr, username=self.creds["email"], password=self.creds["password"])
 
     def assign_phone(self, user_id: int, phone_number: int) -> bool:
         _success = False

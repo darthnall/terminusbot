@@ -1,6 +1,7 @@
 from auth import Session, Validator
 from client import Unit, User
 from client.form import create_registration_form, Field
+from client.emailuser import EmailUser
 
 from flask import Flask, render_template, request
 from flask import session as flask_session
@@ -46,7 +47,8 @@ def create_app(token: str, secret_key: UUID):
                     unit = Unit(creds=user.creds, session=session)
                     unit.assign(user_id=user.creds["userId"])
 
-                    user.email_creds()
+                    if user.email_creds():
+                        print("Email sent successfully")
 
             return render_template("register.html", form=form, success=success, bad_items=bad_items)
 

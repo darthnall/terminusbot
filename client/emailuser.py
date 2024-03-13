@@ -3,20 +3,16 @@ import smtplib
 import ssl
 from email.message import EmailMessage
 
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
+
 from dotenv import load_dotenv
 from smtplib import SMTPException
 
 
 class EmailUser:
-    def __init__(self, creds: dict) -> None:
+    def __init__(self) -> None:
         self._email_password: str = os.environ["EMAIL_PASSWORD"]
-        self._soup: BeautifulSoup = self.cook_soup(creds=creds)
-        self._body: str = str(self._soup)
-
-    @property
-    def body(self) -> str:
-        return self._body
+        self._body: str
 
     @property
     def email_password(self) -> str:
@@ -27,38 +23,39 @@ class EmailUser:
         return "blake@terminusgps.com"
 
     @property
-    def soup(self) -> BeautifulSoup:
-        return self._soup
-
-    @property
     def subject(self) -> str:
         return "Your Wialon Credentials"
 
-    def create_message(self, to_addr: str) -> EmailMessage:
+    @property
+    def body(self) -> str:
+        return self._body
+
+    def fill_soup(self, username: str, password: str) -> BeautifulSoup:
+        with open("templates/emailuser.html") as f:
+            soup = BeautifulSoup(f, "html.parser")
+
+            username_tag = soup.find(id="username")
+            password_tag = soup.find(id="password")
+            login_link_tag = soup.find(id="login_link")
+
+            username_tag.string = username
+            password_tag.string = password
+            login_link_tag['href'] = f"https://hosting.terminusgps.com/?user={username}"
+
+        return soup
+
+    def create_message(self, to_addr: str, soup: BeautifulSoup) -> EmailMessage:
         msg = EmailMessage()
         msg["From"] = self.from_addr
         msg["To"] = to_addr
         msg["Subject"] = self.subject
-        msg.set_content(self.body, subtype="html")
+        msg.set_content(str(soup), subtype="html")
 
         return msg
 
-    def cook_soup(self, creds: dict[str, str]) -> BeautifulSoup:
-        with open("client/emailuser.html", "r") as html:
-            soup: BeautifulSoup = BeautifulSoup(html, features="html.parser")
-            return self.fill_soup(soup=soup, creds=creds)
-
-    def fill_soup(self, soup: BeautifulSoup, creds: dict) -> BeautifulSoup:
-        key: list[str] = ["Username: ", creds["email"], "Password: ", creds["password"]]
-        inputs: list[Tag] = [tag for tag in soup.find_all("td")]
-
-        for index, value in enumerate(inputs):
-            value.string = key[index]
-
-        return soup
-
-    def send(self, to_addr: str) -> bool:
-        msg = self.create_message(to_addr=to_addr)
+    def send(self, to_addr: str, username: str, password: str) -> bool:
+        soup = self.fill_soup(username=username, password=password)
+        msg = self.create_message(to_addr=to_addr, soup=soup)
 
         context = ssl.create_default_context()
 
@@ -76,5 +73,5 @@ class EmailUser:
 
 if __name__ == "__main__":
     load_dotenv()
-    creds = {"email": "blakenall@proton.me", "password": "AReallySecurePassword123!"}
-    email = EmailUser(creds=creds)
+    email = EmailUser()
+    email.send(to_addr="blakenall@proton.me", username="blakenall@proton.me", password="AReallySecurePassword!1")
