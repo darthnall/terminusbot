@@ -1,6 +1,6 @@
-from . import Searcher, Session
+from . import Searcher
 
-from client.form import Field
+import asyncio
 
 def init_validation(target: str | None) -> tuple[bool, str]:
     return False, f"Invalid input: {target}"
@@ -19,34 +19,20 @@ class Validator:
 
         return has_banned_character
 
-    def validate_all(self, data: dict[str, str]) -> list[str | None]:
-        bad_items: list[str | None] = []
-        for id, target in data.items():
-            valid: bool
-            match id:
-                case "firstName":
-                    valid = self.validate_name(target=target)[0]
-                case "lastName":
-                    valid = self.validate_name(target=target)[0]
-                case "email":
-                    valid = self.validate_email(target=target)[0]
-                case "assetName":
-                    valid = self.validate_asset_name(target=target)[0]
-                case "imeiNumber":
-                    valid = self.validate_imei_number(target=target)[0]
-                case "phoneNumber":
-                    valid = self.validate_phone_number(target=target)[0]
-                case "vinNumber":
-                    valid = self.validate_vin_number(target=target)[0]
-                case _:
-                    valid = False
+    async def validate_all(self, data: dict[str, str]) -> list[str | None]:
+        tasks = [
+            asyncio.create_task(self.validate_name(target=data["firstName"])),
+            asyncio.create_task(self.validate_name(target=data["lastName"])),
+            asyncio.create_task(self.validate_email(target=data["email"])),
+            asyncio.create_task(self.validate_asset_name(target=data["assetName"])),
+            asyncio.create_task(self.validate_imei_number(target=data["imeiNumber"])),
+            asyncio.create_task(self.validate_phone_number(target=data["phoneNumber"])),
+            asyncio.create_task(self.validate_vin_number(target=data["vinNumber"])),
+        ]
+        results = await asyncio.gather(*tasks)
+        return [result[1] for result in results if result[0] is False]
 
-            if not valid:
-                bad_items.append(id)
-
-        return bad_items
-
-    def validate_name(self, target: str | None) -> tuple[bool, str]:
+    async def validate_name(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
 
         match target:
@@ -61,7 +47,7 @@ class Validator:
 
         return _valid, msg
 
-    def validate_asset_name(self, target: str | None) -> tuple[bool, str]:
+    async def validate_asset_name(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
 
         match target:
@@ -76,7 +62,7 @@ class Validator:
 
         return _valid, msg
 
-    def validate_email(self, target: str | None) -> tuple[bool, str]:
+    async def validate_email(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
 
         valid_endings: tuple = (
@@ -103,7 +89,7 @@ class Validator:
 
         return _valid, msg
 
-    def validate_phone_number(self, target: str | None) -> tuple[bool, str]:
+    async def validate_phone_number(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
 
         match target:
@@ -118,7 +104,7 @@ class Validator:
 
         return _valid, msg
 
-    def validate_imei_number(self, target: str | None) -> tuple[bool, str]:
+    async def validate_imei_number(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
         search = Searcher(token=self._token)
 
@@ -141,7 +127,7 @@ class Validator:
 
         return _valid, msg
 
-    def validate_vin_number(self, target: str | None) -> tuple[bool, str]:
+    async def validate_vin_number(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
         _valid, msg = True, "Looks good!"
         return _valid, msg

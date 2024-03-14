@@ -8,6 +8,7 @@ from flask import session as flask_session
 
 import dotenv
 import os
+import asyncio
 from uuid import UUID, uuid4
 
 
@@ -25,19 +26,23 @@ def create_app(token: str, secret_key: UUID):
 
             form["imeiNumber"].user_input = request.args.get("imei")
 
-            return render_template("register.html", title="Registration", form=form)
+            return render_template("register.html", title="Registration", form=form, success=None)
 
         elif request.method == "POST":
             form = flask_session['REGISTRATION_FORM']
             data = request.form
             success = False
+            title = "Failure"
 
             bad_items = Validator(token=token).validate_all(data=data)
 
-            print(f"{bad_items = }")
-
             if not bad_items:
                 success = True
+                title = "Success"
+
+            if "vinNumber" or "phoneNumber" in bad_items:
+                success = True
+                title = "Success"
 
             if success:
                 with Session(token=token) as session:
@@ -50,7 +55,9 @@ def create_app(token: str, secret_key: UUID):
                     if user.email_creds():
                         print("Email sent successfully")
 
-            return render_template("register.html", form=form, success=success, bad_items=bad_items)
+            form = create_registration_form()
+            flask_session['REGISTRATION_FORM'] = form
+            return render_template("register.html", title=title, form=form, success=success, bad_items=bad_items)
 
         else:
             return "404"
@@ -126,6 +133,8 @@ def create_app(token: str, secret_key: UUID):
 
         _valid, _msg = Validator(token=token).validate_asset_name(target=_input)
 
+        print(f"{_valid = } {_msg = } {_input = }")
+
         update_field(
             field=field,
             data=(
@@ -144,6 +153,8 @@ def create_app(token: str, secret_key: UUID):
         _input = request.form.get("phoneNumber")
 
         _valid, _msg = Validator(token=token).validate_phone_number(target=_input)
+
+        print(f"{_valid = } {_msg = } {_input = }")
 
         update_field(
             field=field,
@@ -164,6 +175,8 @@ def create_app(token: str, secret_key: UUID):
 
         _valid, _msg = Validator(token=token).validate_imei_number(target=_input)
 
+        print(f"{_valid = } {_msg = } {_input = }")
+
         update_field(
             field=field,
             data=(
@@ -178,10 +191,14 @@ def create_app(token: str, secret_key: UUID):
     @app.route("/v/vin-number", methods=["POST"])
     def validate_vin():
         field = flask_session['REGISTRATION_FORM']["vinNumber"]
+        validator = Validator(token=token)
+
         _valid = False
         _input = request.form.get("vinNumber")
 
-        _valid, _msg = Validator(token=token).validate_vin_number(target=_input)
+        _valid, _msg = asyncio.run(validator.validate_vin_number(target=_input))
+
+        print(f"{_valid = } {_msg = } {_input = }")
 
         update_field(
             field=field,

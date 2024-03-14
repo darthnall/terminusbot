@@ -62,7 +62,8 @@ def create_registration_form() -> dict[str, Field]:
             "Phone #",
             placeholder="Phone",
             validation_endpoint="/v/phone-number",
-            required=True,
+            required=False,
+            starts_hidden=True,
         ),
         "vinNumber":
         Field(
