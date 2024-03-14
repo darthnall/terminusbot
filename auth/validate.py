@@ -116,13 +116,17 @@ class Validator:
             case target if len(target) != 15:
                 _valid, msg = False, f"IMEI # must be exactly 15 characters. Length: {len(target)}"
             case _:
-                if search.unit_was_previously_assigned(imei=target):
-                    if search.by_imei(imei=target):
+                """unit_is_available = await search.unit_is_available(imei=target)
+                if unit_is_available:
+                    unit_id = await search.by_imei(imei=target)
+                    if unit_id:
                         _valid, msg = True, "Looks good!"
                     else:
                         _valid, msg = False, "Couldn't find associated unit. Try again or call if issue persists."
                 else:
-                    _valid, msg = False, "Invalid unit. support@terminusgps.com has been notified of this error."
+                    """
+                print(search.by_imei(imei=target))
+                _valid, msg = False, "Invalid unit. support@terminusgps.com has been notified of this error."
                     # TODO: Email myself this error.
 
         return _valid, msg

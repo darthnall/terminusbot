@@ -1,7 +1,6 @@
 from auth import Session, Validator
 from client import Unit, User
-from client.form import create_registration_form, Field
-from client.emailuser import EmailUser
+from client.form import create_registration_form
 
 from flask import Flask, render_template, request
 from flask import session as flask_session
@@ -34,15 +33,9 @@ def create_app(token: str, secret_key: UUID):
             success = False
             title = "Failure"
 
-            bad_items = Validator(token=token).validate_all(data=data)
+            results = asyncio.run(Validator(token=token).validate_all(data=data))
 
-            if not bad_items:
-                success = True
-                title = "Success"
-
-            if "vinNumber" or "phoneNumber" in bad_items:
-                success = True
-                title = "Success"
+            print(results)
 
             if success:
                 with Session(token=token) as session:
@@ -68,7 +61,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("firstName")
 
-        _valid, _msg = Validator(token=token).validate_name(target=_input)
+        _valid, _msg = asyncio.run(Validator(token=token).validate_name(target=_input))
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -89,7 +82,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("lastName")
 
-        _valid, _msg = Validator(token=token).validate_name(target=_input)
+        _valid, _msg = asyncio.run(Validator(token=token).validate_name(target=_input))
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -110,7 +103,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("email")
 
-        _valid, _msg = Validator(token=token).validate_email(target=_input)
+        _valid, _msg = asyncio.run(Validator(token=token).validate_email(target=_input))
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -131,7 +124,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("assetName")
 
-        _valid, _msg = Validator(token=token).validate_asset_name(target=_input)
+        _valid, _msg = asyncio.run(Validator(token=token).validate_asset_name(target=_input))
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -152,7 +145,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("phoneNumber")
 
-        _valid, _msg = Validator(token=token).validate_phone_number(target=_input)
+        _valid, _msg = asyncio.run(Validator(token=token).validate_phone_number(target=_input))
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -170,10 +163,11 @@ def create_app(token: str, secret_key: UUID):
     @app.route("/v/imei-number", methods=["POST"])
     def validate_imei():
         field = flask_session['REGISTRATION_FORM']["imeiNumber"]
+
         _valid = False
         _input = request.form.get("imeiNumber")
 
-        _valid, _msg = Validator(token=token).validate_imei_number(target=_input)
+        _valid, _msg = asyncio.run(Validator(token=token).validate_imei_number(target=_input))
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -191,12 +185,11 @@ def create_app(token: str, secret_key: UUID):
     @app.route("/v/vin-number", methods=["POST"])
     def validate_vin():
         field = flask_session['REGISTRATION_FORM']["vinNumber"]
-        validator = Validator(token=token)
 
         _valid = False
         _input = request.form.get("vinNumber")
 
-        _valid, _msg = asyncio.run(validator.validate_vin_number(target=_input))
+        _valid, _msg = asyncio.run(Validator(token=token).validate_vin_number(target=_input))
 
         print(f"{_valid = } {_msg = } {_input = }")
 

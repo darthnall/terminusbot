@@ -2,6 +2,7 @@ from . import Session
 
 from functools import cache
 
+import asyncio
 
 class Searcher:
     """
@@ -9,6 +10,10 @@ class Searcher:
     """
     def __init__(self, token: str) -> None:
         self._token = token
+
+    async def search(self, params: dict, session: Session) -> dict:
+        task = asyncio.create_task(session.wialon_api.core_search_items(**params))
+        return await task
 
     def by_imei(self, imei: str) -> int | None:
         """
@@ -44,14 +49,13 @@ class Searcher:
 
         # Open a session and search for the item
         with Session(token=self._token) as session:
-            response = session.wialon_api.core_search_items(**params)
-            print(response)
+            response = asyncio.run(self.search(params=params, session=session))
             __id = int(response["items"][0]["id"])
 
         return __id
 
     @cache
-    def unit_was_previously_assigned(self, imei: str) -> bool:
+    def unit_is_available(self, imei: str) -> bool:
         unit_is_available = False
         params = {
             "spec": {
@@ -66,7 +70,8 @@ class Searcher:
             "to": 0,
         }
         with Session(token=self._token) as session:
-            response = session.wialon_api.core_search_items(**params)
+            response = asyncio.run(self.search(params=params), session=session)
+            print(response)
             if response["totalItemsCount"] == 0:
                 unit_is_available = False
             elif response["items"][0]["nm"] == imei:
