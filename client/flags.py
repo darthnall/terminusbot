@@ -1,27 +1,7 @@
 from auth import Session
-from dataclasses import dataclass
 
-@dataclass
 class Flags:
-    user: dict = {
-        "disable_user": 0x01,
-        "cant_change_password": 0x02,
-        "can_create_items": 0x04,
-        "cant_change_settings": 0x10,
-        "can_send_sms": 0x20,
-    }
-    unit: dict = {
-        "view_item_and_its_basic_properties": 0x0001,
-        "view_detailed_item_properties": 0x0002,
-        "manage_access_to_this_item": 0x0004,
-        "rename_item": 0x0010,
-        "view_custom_fields": 0x0020,
-        "change_icon": 0x0100,
-        "view_attached_files": 0x4000,
-    }
-
-class Flagsu:
-    USER_FLAGS: set = {
+    USER_FLAGS = {
         0x01, # User disabled
         0x02, # Can't change password
         0x04, # Can create items
@@ -48,8 +28,8 @@ class Flagsu:
         self.session = session
 
     def allow_password_change(self, user_id: int) -> None:
-        flags = Flags.user["cant_change_password"] + Flags.user["cant_change_settings"]
-        flags_mask = flags - Flags.user["cant_change_password"]
+        flags = 0x02 + 0x10
+        flags_mask = flags - 0x02
         params = { "userId": user_id, "flags": flags, "flagsMask": flags_mask }
 
         self.session.wialon_api.user_update_user_flags(**params)
