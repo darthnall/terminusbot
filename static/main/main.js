@@ -1,9 +1,11 @@
 const defaultFormat = "'s Ride";
-let autoUpdateEnabled = true;
 const toggleOptionalFieldsButton = document.getElementById('toggleOptionalFields');
 
+let autoUpdateEnabled = true;
+let toggleOptionalFieldsButtonState = "Show";
+
 function updateAssetName() {
-  let firstNameValue = document.getElementById("firstName").value;
+  const firstNameValue = document.getElementById("firstName").value;
 
   if (autoUpdateEnabled) {
     document.getElementById("assetName").value = firstNameValue + defaultFormat;
@@ -17,8 +19,14 @@ function disableAutoUpdate(event) {
 }
 
 toggleOptionalFieldsButton.addEventListener('click', function() {
-const hiddenElements = document.getElementsByClassName('starts-hidden');
-for (let i = 0; i < hiddenElements.length; i++) {
+  const hiddenElements = document.getElementsByClassName('starts-hidden');
+  for (let i = 0; i < hiddenElements.length; i++) {
     hiddenElements[i].classList.toggle('hidden');
   }
+  if (hiddenElements[0].classList.contains('hidden')) {
+    toggleOptionalFieldsButtonState = "Show";
+    } else {
+    toggleOptionalFieldsButtonState = "Hide";
+    }
+  toggleOptionalFieldsButton.textContent = toggleOptionalFieldsButtonState;
 });

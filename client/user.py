@@ -33,10 +33,10 @@ class User:
 
         """
         params = {
-            "creatorId": 27881459,  # Terminus-1000's user id
-            "name": name,  # User's email
-            "password": password,  # Generated password
-            "dataFlags": 1,  # Default flags
+            "creatorId": 27881459, # Terminus-1000's user id
+            "name": name,
+            "password": password,
+            "dataFlags": 1,
         }
 
         response = self.session.wialon_api.core_create_user(**params)
@@ -51,7 +51,7 @@ class User:
     def set_default_perms(self, unit_id: int) -> None:
         # TODO: Convert hexadecimals to integers
         """
-        Set user's default flags.
+        Set user's default permissions.
 
         Parameters
         ----------
@@ -61,7 +61,7 @@ class User:
         Returns
         -------
         _success: <bool>
-            True if the flags were set, False otherwise.
+            True if the permission were set, False otherwise.
 
         """
         flags = [
@@ -81,15 +81,6 @@ class User:
         self.session.wialon_api.user_update_item_access(**params)
 
     def set_default_flags(self) -> None:
-        """
-        Set user's default flags.
-
-        Returns
-        -------
-        _success: <bool>
-            True if the flags were set, False otherwise.
-
-        """
         params = {"userId": self.creds["userId"], "flags": 2, "flagsMask": 0}
         self.session.wialon_api.user_update_user_flags(**params)
 

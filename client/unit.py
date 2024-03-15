@@ -4,13 +4,13 @@ from auth import Searcher, Session
 
 
 class Unit:
-    def __init__(self, creds: dict, session: Session) -> None:
+    def __init__(self, imei: str, name: str, session: Session) -> None:
         self.session = session
-        self.search = Searcher(token=session._token)
+        search = Searcher(token=session._token)
 
-        self._imei = creds["imei"]
-        self._name = creds["assetName"]
-        self._id = self.search.by_imei(creds["imei"])
+        self._imei_number = int(imei)
+        self._name = name
+        self._id = search.by_imei(self.imei_number)
 
     def __repr__(self) -> str:
         return f"{self = }"
@@ -22,6 +22,10 @@ class Unit:
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def imei_number(self) -> int:
+        return self._imei_number
 
     def assign(self, user_id: str) -> dict:
         flags = [

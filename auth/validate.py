@@ -1,7 +1,5 @@
 from . import Searcher
 
-import asyncio
-
 def init_validation(target: str | None) -> tuple[bool, str]:
     return False, f"Invalid input: {target}"
 
@@ -19,20 +17,19 @@ class Validator:
 
         return has_banned_character
 
-    async def validate_all(self, data: dict[str, str]) -> list[str | None]:
-        tasks = [
-            asyncio.create_task(self.validate_name(target=data["firstName"])),
-            asyncio.create_task(self.validate_name(target=data["lastName"])),
-            asyncio.create_task(self.validate_email(target=data["email"])),
-            asyncio.create_task(self.validate_asset_name(target=data["assetName"])),
-            asyncio.create_task(self.validate_imei_number(target=data["imeiNumber"])),
-            asyncio.create_task(self.validate_phone_number(target=data["phoneNumber"])),
-            asyncio.create_task(self.validate_vin_number(target=data["vinNumber"])),
-        ]
-        results = await asyncio.gather(*tasks)
+    def validate_all(self, data: dict[str, str]) -> list[str | None]:
+        results = {
+            self.validate_name(target=data["firstName"]),
+            self.validate_name(target=data["lastName"]),
+            self.validate_email(target=data["email"]),
+            self.validate_asset_name(target=data["assetName"]),
+            self.validate_imei_number(target=data["imeiNumber"]),
+            self.validate_phone_number(target=data["phoneNumber"]),
+            self.validate_vin_number(target=data["vinNumber"]),
+        }
         return [result[1] for result in results if result[0] is False]
 
-    async def validate_name(self, target: str | None) -> tuple[bool, str]:
+    def validate_name(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
 
         match target:
@@ -47,7 +44,7 @@ class Validator:
 
         return _valid, msg
 
-    async def validate_asset_name(self, target: str | None) -> tuple[bool, str]:
+    def validate_asset_name(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
 
         match target:
@@ -62,7 +59,7 @@ class Validator:
 
         return _valid, msg
 
-    async def validate_email(self, target: str | None) -> tuple[bool, str]:
+    def validate_email(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
 
         valid_endings: tuple = (
@@ -89,9 +86,12 @@ class Validator:
 
         return _valid, msg
 
-    async def validate_phone_number(self, target: str | None) -> tuple[bool, str]:
+    def validate_phone_number(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
 
+        _valid, msg = True, "Looks good!"
+        return _valid, msg
+        """
         match target:
             case "" | None:
                 _valid, msg = False, "Please input a phone number."
@@ -103,8 +103,9 @@ class Validator:
                 _valid, msg = True, "Looks good!"
 
         return _valid, msg
+        """
 
-    async def validate_imei_number(self, target: str | None) -> tuple[bool, str]:
+    def validate_imei_number(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
         search = Searcher(token=self._token)
 
@@ -115,23 +116,16 @@ class Validator:
                 _valid, msg = False, "IMEI # must be digits only."
             case target if len(target) != 15:
                 _valid, msg = False, f"IMEI # must be exactly 15 characters. Length: {len(target)}"
-            case _:
-                """unit_is_available = await search.unit_is_available(imei=target)
-                if unit_is_available:
-                    unit_id = await search.by_imei(imei=target)
-                    if unit_id:
-                        _valid, msg = True, "Looks good!"
-                    else:
-                        _valid, msg = False, "Couldn't find associated unit. Try again or call if issue persists."
-                else:
-                    """
-                print(search.by_imei(imei=target))
+            case target if not search.unit_is_available(imei=target):
                 _valid, msg = False, "Invalid unit. support@terminusgps.com has been notified of this error."
-                    # TODO: Email myself this error.
+            case target if not search.by_imei(imei=target):
+                _valid, msg = False, "Couldn't find associated unit. Try again or call if issue persists."
+            case _:
+                _valid, msg = True, "Looks good!"
 
         return _valid, msg
 
-    async def validate_vin_number(self, target: str | None) -> tuple[bool, str]:
+    def validate_vin_number(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
         _valid, msg = True, "Looks good!"
         return _valid, msg

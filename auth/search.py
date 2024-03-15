@@ -2,8 +2,6 @@ from . import Session
 
 from functools import cache
 
-import asyncio
-
 class Searcher:
     """
     Search the Wialon database via the Wialon API.
@@ -11,11 +9,10 @@ class Searcher:
     def __init__(self, token: str) -> None:
         self._token = token
 
-    async def search(self, params: dict, session: Session) -> dict:
-        task = asyncio.create_task(session.wialon_api.core_search_items(**params))
-        return await task
+    def search(self, params: dict, session: Session) -> dict:
+        return session.wialon_api.core_search_items(**params)
 
-    def by_imei(self, imei: str) -> int | None:
+    def by_imei(self, imei: int) -> int | None:
         """
         Search for an item by its IMEI number.
 
@@ -29,11 +26,8 @@ class Searcher:
         __id: <int | None>
             The ID of the item if found, otherwise None.
         """
-
-        if imei == "":
-            return None
-
         __id: int | None = None
+
         params = {
             "spec": {
                 "itemsType": "avl_unit",
@@ -49,7 +43,7 @@ class Searcher:
 
         # Open a session and search for the item
         with Session(token=self._token) as session:
-            response = asyncio.run(self.search(params=params, session=session))
+            response = self.search(params=params, session=session)
             __id = int(response["items"][0]["id"])
 
         return __id
@@ -70,10 +64,9 @@ class Searcher:
             "to": 0,
         }
         with Session(token=self._token) as session:
-            response = asyncio.run(self.search(params=params), session=session)
-            print(response)
+            response = self.search(params=params, session=session)
             if response["totalItemsCount"] == 0:
-                unit_is_available = False
+                    unit_is_available = False
             elif response["items"][0]["nm"] == imei:
                 unit_is_available = True
             else:

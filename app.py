@@ -7,7 +7,6 @@ from flask import session as flask_session
 
 import dotenv
 import os
-import asyncio
 from uuid import UUID, uuid4
 
 
@@ -33,17 +32,22 @@ def create_app(token: str, secret_key: UUID):
             success = False
             title = "Failure"
 
-            results = asyncio.run(Validator(token=token).validate_all(data=data))
+            bad_items = Validator(token=token).validate_all(data=data)
 
-            print(results)
+            if len(bad_items) == 0:
+                success = True
+                title = "Success!"
 
             if success:
                 with Session(token=token) as session:
                     user = User(data=data, session=session)
                     user.create(name=user.creds["email"], password=user.creds["password"])
+                    print("Created user in Wialon")
+                    print(f"{user.creds = }")
 
-                    unit = Unit(creds=user.creds, session=session)
+                    unit = Unit(imei=user.creds["imeiNumber"], name=user.creds["assetName"], session=session)
                     unit.assign(user_id=user.creds["userId"])
+                    print("Assigned unit to user in Wialon")
 
                     if user.email_creds():
                         print("Email sent successfully")
@@ -61,7 +65,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("firstName")
 
-        _valid, _msg = asyncio.run(Validator(token=token).validate_name(target=_input))
+        _valid, _msg = Validator(token=token).validate_name(target=_input)
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -82,7 +86,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("lastName")
 
-        _valid, _msg = asyncio.run(Validator(token=token).validate_name(target=_input))
+        _valid, _msg = Validator(token=token).validate_name(target=_input)
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -103,7 +107,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("email")
 
-        _valid, _msg = asyncio.run(Validator(token=token).validate_email(target=_input))
+        _valid, _msg = Validator(token=token).validate_email(target=_input)
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -124,7 +128,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("assetName")
 
-        _valid, _msg = asyncio.run(Validator(token=token).validate_asset_name(target=_input))
+        _valid, _msg = Validator(token=token).validate_asset_name(target=_input)
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -145,7 +149,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("phoneNumber")
 
-        _valid, _msg = asyncio.run(Validator(token=token).validate_phone_number(target=_input))
+        _valid, _msg = Validator(token=token).validate_phone_number(target=_input)
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -167,7 +171,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("imeiNumber")
 
-        _valid, _msg = asyncio.run(Validator(token=token).validate_imei_number(target=_input))
+        _valid, _msg = Validator(token=token).validate_imei_number(target=_input)
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -189,7 +193,7 @@ def create_app(token: str, secret_key: UUID):
         _valid = False
         _input = request.form.get("vinNumber")
 
-        _valid, _msg = asyncio.run(Validator(token=token).validate_vin_number(target=_input))
+        _valid, _msg = Validator(token=token).validate_vin_number(target=_input)
 
         print(f"{_valid = } {_msg = } {_input = }")
 
