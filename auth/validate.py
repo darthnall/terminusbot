@@ -1,11 +1,16 @@
+from config import Config
+
 from . import Searcher
 
+
 def init_validation(target: str | None) -> tuple[bool, str]:
+    # Set default validation state and message
     return False, f"Invalid input: {target}"
 
+
 class Validator:
-    def __init__(self, token: str) -> None:
-        self._token = token
+    def __init__(self) -> None:
+        self._token = Config.WIALON_HOSTING_API_TOKEN
 
     def _has_banned_character(self, target: str) -> bool:
         has_banned_character = False
@@ -27,9 +32,11 @@ class Validator:
             self.validate_phone_number(target=data["phoneNumber"]),
             self.validate_vin_number(target=data["vinNumber"]),
         }
+        # Return a list containing invalid results
         return [result[1] for result in results if result[0] is False]
 
     def validate_name(self, target: str | None) -> tuple[bool, str]:
+        # TODO: Create separate first and last name validation
         _valid, msg = init_validation(target=target)
 
         match target:
@@ -51,7 +58,10 @@ class Validator:
             case "" | None:
                 _valid, msg = False, "Please input a name for your new asset."
             case target if len(target) > 60:
-                _valid, msg = False, f"Name must be under 60 characters. Input was {len(target)} characters."
+                _valid, msg = (
+                    False,
+                    f"Name must be under 60 characters. Input was {len(target)} characters.",
+                )
             case target if self._has_banned_character(target=target):
                 _valid, msg = False, "Name contains invalid character."
             case _:
@@ -76,17 +86,24 @@ class Validator:
             case "" | None:
                 _valid, msg = False, "Please input your email address."
             case target if len(target) > 60:
-                _valid, msg = False, f"Email must be less than 60 characters. Length: {len(target)}"
+                _valid, msg = (
+                    False,
+                    f"Email must be less than 60 characters. Length: {len(target)}",
+                )
             case _:
                 addr = target.split("@")
                 if addr[1].endswith(valid_endings):
                     _valid, msg = True, "Looks good!"
                 else:
-                    _valid, msg = False, f"Email must contain a valid domain. Valid domains: {valid_endings}"
+                    _valid, msg = (
+                        False,
+                        f"Email must contain a valid domain. Valid domains: {valid_endings}",
+                    )
 
         return _valid, msg
 
     def validate_phone_number(self, target: str | None) -> tuple[bool, str]:
+        # TODO: Add phone number validation
         _valid, msg = init_validation(target=target)
 
         _valid, msg = True, "Looks good!"
@@ -107,19 +124,28 @@ class Validator:
 
     def validate_imei_number(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
-        search = Searcher(token=self._token)
+        search = Searcher()
 
         match target:
             case "" | None:
                 _valid, msg = False, "Please input your IMEI #."
-            case target if target.isdigit() is False:
+            case target if not target.isdigit():
                 _valid, msg = False, "IMEI # must be digits only."
             case target if len(target) != 15:
-                _valid, msg = False, f"IMEI # must be exactly 15 characters. Length: {len(target)}"
+                _valid, msg = (
+                    False,
+                    f"IMEI # must be exactly 15 characters. Length: {len(target)}",
+                )
             case target if not search.unit_is_available(imei=target):
-                _valid, msg = False, "Invalid unit. support@terminusgps.com has been notified of this error."
+                _valid, msg = (
+                    False,
+                    "Invalid unit. support@terminusgps.com has been notified of this error.",
+                )
             case target if not search.by_imei(imei=target):
-                _valid, msg = False, "Couldn't find associated unit. Try again or call if issue persists."
+                _valid, msg = (
+                    False,
+                    "Couldn't find associated unit. Try again or call if issue persists.",
+                )
             case _:
                 _valid, msg = True, "Looks good!"
 

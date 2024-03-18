@@ -1,14 +1,13 @@
-import wialon
+from config import Config
+from wialon.api import Wialon
 
 
 class Session:
-    def __init__(self, token: str) -> None:
-        # Load the Wialon API wrapper
-        self.wialon_api = wialon.Wialon()
-        self._token = token
+    def __init__(self) -> None:
+        self.wialon_api = Wialon()
+        self._token = Config.WIALON_HOSTING_API_TOKEN
 
     def __enter__(self):
-        # Login to the Wialon API
         login = self.wialon_api.token_login(token=self._token)
         self.wialon_api.sid = login["eid"]
         self._sid = login["eid"]
@@ -16,7 +15,6 @@ class Session:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> str | None:
-        # Logout of the Wialon API
         self.wialon_api.core_logout()
 
         __err = f"{exc_type = }, {exc_val = }, {exc_tb = }"

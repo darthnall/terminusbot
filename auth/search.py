@@ -1,13 +1,16 @@
 from . import Session
+from config import Config
 
 from functools import cache
+
 
 class Searcher:
     """
     Search the Wialon database via the Wialon API.
     """
-    def __init__(self, token: str) -> None:
-        self._token = token
+
+    def __init__(self) -> None:
+        self._token = Config.WIALON_HOSTING_API_TOKEN
 
     def search(self, params: dict, session: Session) -> dict:
         return session.wialon_api.core_search_items(**params)
@@ -42,7 +45,7 @@ class Searcher:
         }
 
         # Open a session and search for the item
-        with Session(token=self._token) as session:
+        with Session() as session:
             response = self.search(params=params, session=session)
             __id = int(response["items"][0]["id"])
 
@@ -63,10 +66,11 @@ class Searcher:
             "from": 0,
             "to": 0,
         }
-        with Session(token=self._token) as session:
+        with Session() as session:
+            # TODO: Simplify this logic
             response = self.search(params=params, session=session)
             if response["totalItemsCount"] == 0:
-                    unit_is_available = False
+                unit_is_available = False
             elif response["items"][0]["nm"] == imei:
                 unit_is_available = True
             else:

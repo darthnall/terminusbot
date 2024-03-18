@@ -1,7 +1,7 @@
-import os
 import smtplib
 import ssl
 from email.message import EmailMessage
+from config import Config
 
 from bs4 import BeautifulSoup
 
@@ -11,7 +11,7 @@ from smtplib import SMTPException
 
 class EmailUser:
     def __init__(self) -> None:
-        self._email_password: str = os.environ["EMAIL_PASSWORD"]
+        self._email_password: str = Config.EMAIL_PASSWORD
         self._body: str
 
     @property
