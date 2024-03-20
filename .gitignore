@@ -11,3 +11,4 @@ data.json
 
 supervisord.conf
 nginx.conf
+default_nginx.conf
