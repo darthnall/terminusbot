@@ -8,3 +8,6 @@ experimental/
 
 *.log
 data.json
+
+supervisord.conf
+nginx.conf
