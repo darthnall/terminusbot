@@ -1,5 +1,5 @@
 from config import Config
-from wialon.api import Wialon
+from wialon import Wialon
 
 
 class Session:
