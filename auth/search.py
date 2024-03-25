@@ -35,7 +35,7 @@ class Searcher:
             "spec": {
                 "itemsType": "avl_unit",
                 "propName": "sys_unique_id",
-                "propValueMask": imei,
+                "propValueMask": f"*{imei}*",
                 "sortType": "sys_unique_id",
             },
             "force": 1,
@@ -58,7 +58,7 @@ class Searcher:
             "spec": {
                 "itemsType": "avl_unit",
                 "propName": "sys_name",
-                "propValueMask": imei,
+                "propValueMask": f"*{imei}*",
                 "sortType": "sys_name",
             },
             "force": 1,
@@ -67,11 +67,12 @@ class Searcher:
             "to": 0,
         }
         with Session() as session:
-            # TODO: Simplify this logic
             response = self.search(params=params, session=session)
-            if response["totalItemsCount"] == 0:
+            total_items = response["totalItemsCount"]
+            name = response["items"][0]["nm"].strip()
+            if total_items == 0:
                 unit_is_available = False
-            elif response["items"][0]["nm"] == imei:
+            elif name == imei:
                 unit_is_available = True
             else:
                 unit_is_available = False

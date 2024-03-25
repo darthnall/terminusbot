@@ -33,7 +33,7 @@ class User:
 
         """
         params = {
-            "creatorId": 27881459, # Terminus-1000's user id
+            "creatorId": 27881459,  # Terminus-1000's user id
             "name": name,
             "password": password,
             "dataFlags": 1,
@@ -48,40 +48,14 @@ class User:
 
         return _success
 
-    def set_default_perms(self, unit_id: int) -> None:
-        # TODO: Convert hexadecimals to integers
-        """
-        Set user's default permissions.
-
-        Parameters
-        ----------
-        unit_id: <int>
-            The ID of the unit to set permissions for.
-
-        Returns
-        -------
-        _success: <bool>
-            True if the permission were set, False otherwise.
-
-        """
-        flags = [
-            0x0001,  # View item and basic properties
-            0x0002,  # View detailed item properties
-            0x0004,  # Manage access to this item
-            0x0010,  # Rename item
-            0x0100,  # Change icon
-            0x0200,  # Query reports or messages
-            0x4000,  # View attached files
-        ]
+    def set_default_flags(self) -> None:
+        flags = 0x02 + 0x10
+        flags_mask = flags - 0x02
         params = {
             "userId": self.creds["userId"],
-            "itemId": unit_id,
-            "accessMask": sum(flags),
+            "flags": flags,
+            "flagsMask": flags_mask,
         }
-        self.session.wialon_api.user_update_item_access(**params)
-
-    def set_default_flags(self) -> None:
-        params = {"userId": self.creds["userId"], "flags": 2, "flagsMask": 0}
         self.session.wialon_api.user_update_user_flags(**params)
 
     def email_creds(self, creds: dict[str, str] | None = None) -> bool:
@@ -103,7 +77,11 @@ class User:
             self.creds = creds
         to_addr = self.creds["email"]
         email = EmailUser()
-        return email.send(to_addr=to_addr, username=self.creds["email"], password=self.creds["password"])
+        return email.send(
+            to_addr=to_addr,
+            username=self.creds["email"],
+            password=self.creds["password"],
+        )
 
     def assign_phone(self, user_id: int, phone_number: int) -> bool:
         _success = False
