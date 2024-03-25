@@ -10,7 +10,7 @@ class Unit:
 
         self._imei_number = int(imei)
         self._name = name
-        self._id = search.by_imei(self.imei_number)
+        self._id = search.by_imei(self._imei_number)
 
     def __repr__(self) -> str:
         return f"{self = }"

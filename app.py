@@ -50,6 +50,7 @@ def create_app():
                         name=user.creds["assetName"],
                         session=session,
                     )
+
                     unit.assign(user_id=user.creds["userId"])
                     print("Created unit in Wialon and assigned to user")
 
