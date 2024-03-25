@@ -29,13 +29,13 @@ class Unit:
 
     def assign(self, user_id: str) -> dict:
         flags = [
-            1,  # View item and basic properties
-            2,  # View detailed item properties
-            16,  # Rename item
-            256,  # Change icon
-            4194304,  # Edit counters
-            33554432,  # Register events
-            268435456,  # View service intervals
+            0x0001,  # View item and its basic properties
+            0x0002,  # View detailed item properties
+            0x0004,  # Manage access to this item
+            0x0010,  # Rename item
+            0x0020,  # View custom fields
+            0x0100,  # Change icon
+            0x4000,  # View attached files
         ]
 
         params = {"userId": user_id, "itemId": self.id, "accessMask": sum(flags)}
