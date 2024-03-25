@@ -6,7 +6,7 @@ from auth import Searcher, Session
 class Unit:
     def __init__(self, imei: str, name: str, session: Session) -> None:
         self.session = session
-        search = Searcher(token=session._token)
+        search = Searcher()
 
         self._imei_number = int(imei)
         self._name = name
