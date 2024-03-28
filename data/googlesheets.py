@@ -1,6 +1,5 @@
 from pathlib import Path
 import datetime
-import os
 import logging
 
 
@@ -103,9 +102,8 @@ class GoogleSheetsAPIAuth:
 
 
 class GoogleSheetsAPI:
-    SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID")
-
-    def __init__(self, auth: GoogleSheetsAPIAuth = None) -> None:
+    def __init__(self, auth: GoogleSheetsAPIAuth = None, id: str = None) -> None:
+        self.SPREADSHEET_ID = id
         try:
             self.creds = auth.get_creds()
         except AttributeError:

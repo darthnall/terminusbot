@@ -1,14 +1,15 @@
-.*
-!.gitignore
-
-package-lock.json
 node_modules/
 __pycache__/
 experimental/
 
+.*
+!.gitignore
 *.log
-data.json
 
-supervisord.conf
-nginx.conf
+credentials.json
+data.json
 default_nginx.conf
+nginx.conf
+package-lock.json
+supervisord.conf
+token.json
