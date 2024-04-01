@@ -6,7 +6,6 @@ from flask import Flask, render_template, request
 from flask import session as flask_session
 
 from config import Config
-from data import GoogleSheetsAPI, GoogleSheetsAPIAuth, HttpError
 
 
 def create_app():
@@ -57,6 +56,7 @@ def create_app():
                     if user.email_creds():
                         print("Email sent successfully")
 
+                    """
                     try:
                         data = {
                             "firstName": user.creds["firstName"],
@@ -72,6 +72,7 @@ def create_app():
                         api.write(data)
                     except Exception:
                         print("Error writing to Google Sheets")
+                    """
 
 
             # Reset the form after submission
