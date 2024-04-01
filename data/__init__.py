@@ -1,2 +1,1 @@
 from terminusquickbooks import Customer
-from googlesheets import GoogleSheetsAPI, GoogleSheetsAPIAuth
