@@ -24,8 +24,8 @@ class Validator:
 
     def validate_all(self, data: dict[str, str]) -> list[str | None]:
         results = {
-            self.validate_name(target=data["firstName"]),
-            self.validate_name(target=data["lastName"]),
+            self.validate_first_name(target=data["firstName"]),
+            self.validate_last_name(target=data["lastName"]),
             self.validate_email(target=data["email"]),
             self.validate_asset_name(target=data["assetName"]),
             self.validate_imei_number(target=data["imeiNumber"]),
@@ -35,8 +35,22 @@ class Validator:
         # Return a list containing invalid results
         return [result[1] for result in results if result[0] is False]
 
-    def validate_name(self, target: str | None) -> tuple[bool, str]:
-        # TODO: Create separate first and last name validation
+    def validate_first_name(self, target: str | None) -> tuple[bool, str]:
+        _valid, msg = init_validation(target=target)
+
+        match target:
+            case "" | None:
+                _valid, msg = False, "Please input a name."
+            case target if self._has_banned_character(target=target):
+                _valid, msg = False, "Name contains invalid character."
+            case target if not target.lower().isalpha():
+                _valid, msg = False, "Name can only contain letters."
+            case _:
+                _valid, msg = True, "Looks good!"
+
+        return _valid, msg
+
+    def validate_last_name(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
 
         match target:
@@ -103,15 +117,11 @@ class Validator:
         return _valid, msg
 
     def validate_phone_number(self, target: str | None) -> tuple[bool, str]:
-        # TODO: Add phone number validation
         _valid, msg = init_validation(target=target)
 
-        _valid, msg = True, "Looks good!"
-        return _valid, msg
-        """
         match target:
             case "" | None:
-                _valid, msg = False, "Please input a phone number."
+                _valid, msg = True, "Looks good!"
             case target if target.isdigit() is False:
                 _valid, msg = False, "Phone # must be digits only."
             case target if len(target) > 15:
@@ -120,7 +130,6 @@ class Validator:
                 _valid, msg = True, "Looks good!"
 
         return _valid, msg
-        """
 
     def validate_imei_number(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
