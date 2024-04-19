@@ -18,9 +18,12 @@ def create_app():
         if request.method == "GET":
             pass
         elif request.method == "POST":
+            status = "failure"
             data = request.json
             id = Searcher().by_imei(data.get("unit"))
-            return jsonify({"status": "success", "data_received": data, "id": id})
+            if id:
+                status = "success"
+            return jsonify({"status": status, "data_received": data})
         else:
             pass
 
