@@ -1,8 +1,8 @@
-from auth import Session, Validator
+from auth import Session, Validator, Searcher
 from client import Unit, User
 from client.form import create_registration_form
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from flask import session as flask_session
 
 from config import Config
@@ -12,6 +12,17 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = Config.SECRET_KEY
     app.config["SESSION_TYPE"] = "filesystem"
+
+    @app.route("/notify", methods=["GET", "POST"])
+    def notify():
+        if request.method == "GET":
+            pass
+        elif request.method == "POST":
+            data = request.json
+            id = Searcher().by_imei(data.get("unit"))
+            return jsonify({"status": "success", "data_received": data, "id": id})
+        else:
+            pass
 
     @app.route("/", methods=["GET", "POST"])
     def register():
