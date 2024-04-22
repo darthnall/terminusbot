@@ -2,6 +2,8 @@ from auth import Session, Validator, Searcher
 from client import Unit, User
 from client.form import create_registration_form
 
+from webhooks import TwilioCaller
+
 from flask import Flask, render_template, request, jsonify
 from flask import session as flask_session
 
@@ -16,14 +18,20 @@ def create_app():
     @app.route("/notify", methods=["GET", "POST"])
     def notify():
         if request.method == "GET":
-            pass
+            return jsonify({"status": "success", "msg": "GET method not implemented."})
+
         elif request.method == "POST":
-            status = "failure"
+            caller = TwilioCaller()
             data = request.json
-            id = Searcher().by_imei(data.get("unit"))
-            if id:
+            phone = data["to_number"]
+
+            try:
+                caller.send(to_number=phone, msg=data["text"])
                 status = "success"
-            return jsonify({"status": status, "data_received": data})
+            except Exception:
+                status = "failure"
+
+            return jsonify({"status": status, "msg": data["text"], "phone": phone})
         else:
             pass
 

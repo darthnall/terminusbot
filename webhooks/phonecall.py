@@ -8,7 +8,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
 from config import Config
-from events import WialonEventHandler, WialonEventListener
+from .events import WialonEventHandler, WialonEventListener
 from twilio.rest import Client
 from auth import Session
 
