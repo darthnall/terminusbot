@@ -2,6 +2,8 @@ from auth import Session, Validator, Searcher
 from client import Unit, User
 from client.form import create_registration_form
 
+from datetime import datetime
+
 from webhooks import TwilioCaller, create_message
 
 from flask import Flask, render_template, request, jsonify
@@ -23,7 +25,10 @@ def create_app():
         elif request.method == "POST":
             caller = TwilioCaller()
             data = request.json
-            phone, msg = create_message(data)
+            try:
+                phone, msg = create_message(data)
+            except KeyError:
+                print(f"{datetime.now()} - KeyError in notify()")
 
             try:
                 caller.send(to_number=phone, msg=msg)
