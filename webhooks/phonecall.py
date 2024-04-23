@@ -10,6 +10,9 @@ sys.path.insert(0, parent_dir)
 from config import Config
 from twilio.rest import Client
 
+def create_message(data: dict) -> tuple[str, str]:
+    return data["to_number"], f"Hello! Your vehicle {data['unit']} changed its ignition state at {data['msg_time']}."
+
 
 class TwilioCaller:
     def __init__(self) -> None:

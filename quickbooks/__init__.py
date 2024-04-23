@@ -1,1 +1,1 @@
-from customer import Customer
+from session import QuickbooksSession
