@@ -9,8 +9,35 @@ sys.path.insert(0, parent_dir)
 from config import Config
 from twilio.rest import Client
 
-def create_message(data: dict) -> tuple[str, str]:
-    return data["to_number"], f"Hello! Your vehicle {data['unit']} changed its ignition state at {data['msg_time']}."
+def create_message(alert_type: str, args: dict) -> tuple[str, str]:
+    match alert_type:
+        case "ignition_on":
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} had its ignition turned on."
+
+        case "ignition_off":
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} had its ignition turned off."
+
+        case "ignition_toggle":
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} had its ignition state changed."
+
+        case "geofence_enter":
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected entering {args['geo_name']}"
+
+        case "geofence_exit":
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected exiting {args['geo_name']}."
+
+        case "geofence_legal":
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected inside of {args['geo_name']}."
+
+        case "geofence_illegal":
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected outside of {args['geo_name']}."
+
+        case _:
+            phone, msg = "+17133049421", "Alert handled improperly. Please check the logs." # Calls Blake when alert_type is not recognized
+
+    print(f"create_message: Calling {phone} with message: {msg}")
+
+    return phone, msg
 
 
 class TwilioCaller:

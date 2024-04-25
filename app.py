@@ -24,9 +24,9 @@ def create_app():
 
         elif request.method == "POST":
             caller = TwilioCaller()
-            data = request.json
+            args = request.view_args
             try:
-                phone, msg = create_message(data)
+                phone, msg = create_message(alert_type=args["alert_type"], args=args)
             except KeyError:
                 print(f"{datetime.now()} - KeyError in notify()")
 
