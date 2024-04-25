@@ -12,25 +12,25 @@ from twilio.rest import Client
 def create_message(alert_type: str, args: dict) -> tuple[str, str]:
     match alert_type:
         case "ignition_on":
-            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} had its ignition turned on."
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} had its ignition turned on near {args['loc']}."
 
         case "ignition_off":
-            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} had its ignition turned off."
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} had its ignition turned off near {args['loc']}."
 
         case "ignition_toggle":
-            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} had its ignition state changed."
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} had its ignition state changed near {args['loc']}."
 
         case "geofence_enter":
-            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected entering {args['geo_name']}"
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected entering {args['geo_name']} near {args['loc']}."
 
         case "geofence_exit":
-            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected exiting {args['geo_name']}."
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected exiting {args['geo_name']} near {args['loc']}."
 
         case "geofence_legal":
-            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected inside of {args['geo_name']}."
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected inside of {args['geo_name']} near {args['loc']}."
 
         case "geofence_illegal":
-            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected outside of {args['geo_name']}."
+            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} was detected outside of {args['geo_name']} near {args['loc']}."
 
         case _:
             phone, msg = "+17133049421", "Alert handled improperly. Please check the logs." # Calls Blake when alert_type is not recognized
