@@ -9,10 +9,10 @@ sys.path.insert(0, parent_dir)
 from config import Config
 from twilio.rest import Client
 
-def create_message(alert_type: str, args: dict) -> tuple[str, str]:
+def create_message(alert_type: str, args) -> tuple[str, str]:
     match alert_type:
         case "ignition_on":
-            phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} had its ignition turned on near {args['location']}."
+            phone, msg = args.get("to_number"), f"Hello! At {args.get('pos_time')}, your vehicle {args.get('unit')} had its ignition turned on near {args.get('location')}."
 
         case "ignition_off":
             phone, msg = args["to_number"], f"Hello! At {args['pos_time']}, your vehicle {args['unit']} had its ignition turned off near {args['location']}."

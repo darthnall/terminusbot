@@ -24,10 +24,12 @@ def create_app():
 
         elif request.method == "POST":
             caller = TwilioCaller()
-            args = request.view_args
+            alert_type = request.form.get('alert_type')
             try:
-                phone, msg = create_message(alert_type=args["alert_type"], args=args)
+                phone, msg = create_message(alert_type=alert_type, args=request.form)
             except KeyError:
+                print(f"{alert_type = }")
+                print(f"{request.form = }")
                 print(f"{datetime.now()} - KeyError in notify()")
 
             try:
@@ -36,7 +38,7 @@ def create_app():
             except Exception:
                 status = "failure"
 
-            return jsonify({"status": status, "msg": data["text"], "phone": phone})
+            return jsonify({"status": status, "phone": phone})
         else:
             pass
 

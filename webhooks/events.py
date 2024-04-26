@@ -1,4 +1,3 @@
-from typing import Self
 from wialon import Wialon
 
 
@@ -7,7 +6,7 @@ class WialonEventListener:
         self.wialon_api = Wialon()
         self._token = token
 
-    def __enter__(self) -> Self:
+    def __enter__(self):
         login = self.wialon_api.token_login(token=self._token)
         self.wialon_api.sid = login["eid"]
         self._sid = login["eid"]
