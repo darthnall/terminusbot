@@ -26,11 +26,11 @@ def create_app():
             caller = TwilioCaller()
             alert_type = request.form.get('alert_type')
             try:
-                phone, msg = create_message(alert_type=alert_type, args=request.form)
+                phone, msg = create_message(alert_type=alert_type, data=request.form)
             except KeyError:
+                print(f"{datetime.now()} - KeyError in notify()")
                 print(f"{alert_type = }")
                 print(f"{request.form = }")
-                print(f"{datetime.now()} - KeyError in notify()")
 
             try:
                 caller.send(to_number=phone, msg=msg)
