@@ -63,9 +63,9 @@ def create_message(alert_type: str, data: dict) -> tuple[str, str]:
 
         case _:
             phone, msg = (
-                "+17133049421",
+                None,
                 PhoneMessage.ERROR.format_message(**data),
-            )  # Calls Blake when alert_type is not recognized
+            )  # Logs error message and doesn't call
 
     return phone, msg
 
@@ -77,7 +77,8 @@ class TwilioCaller:
         self.client = Client(self._sid, self._token)
 
     def send(self, to_number: str, msg: str) -> str:
-        print(f"Calling {to_number} with message: {msg}")
+        if not to_number:
+            return "No phone number provided."
         return self.client.calls.create(
             twiml=f"<Response><Say>{msg}</Say></Response>",
             to=to_number,
