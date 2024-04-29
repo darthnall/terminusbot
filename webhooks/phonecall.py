@@ -8,7 +8,7 @@ sys.path.insert(0, parent_dir)
 
 from config import Config
 from twilio.rest import Client
-from message import PhoneMessage
+from .message import PhoneMessage
 
 
 def create_message(alert_type: str, data: dict) -> tuple[str, str]:
