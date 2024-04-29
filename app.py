@@ -17,6 +17,23 @@ def create_app():
     app.secret_key = Config.SECRET_KEY
     app.config["SESSION_TYPE"] = "filesystem"
 
+    @app.route("/emailsignup", methods=["GET", "POST"])
+    def emailsignup():
+        if request.method == "GET":
+            return render_template("emailsignup.html")
+        if request.method == "POST":
+            success = False
+            email = request.form.get("email")
+            consent = bool(request.form.get("consent"))
+
+            if consent:
+                print(f"{datetime.now()} - {email = }")
+                success = True
+
+            return render_template("partials/emailsignup.html", email=email, success=success)
+        else:
+            return "404"
+
     @app.route("/notify", methods=["GET", "POST"])
     def notify():
         if request.method == "GET":
@@ -25,18 +42,13 @@ def create_app():
         elif request.method == "POST":
             caller = TwilioCaller()
             alert_type = request.form.get('alert_type')
-            try:
-                phone, msg = create_message(alert_type=alert_type, data=request.form)
-            except KeyError:
-                print(f"{datetime.now()} - KeyError in notify()")
-                print(f"{alert_type = }")
-                print(f"{request.form = }")
+            phone, msg = create_message(alert_type=alert_type, data=request.form)
 
-            try:
+            if phone or msg is None:
+                status = "failure"
+            else:
                 caller.send(to_number=phone, msg=msg)
                 status = "success"
-            except Exception:
-                status = "failure"
 
             return jsonify({"status": status, "phone": phone})
         else:

@@ -13,5 +13,7 @@ class PhoneMessage(Enum):
 
     PASSENGER_DETECTED = "Hello! At {pos_time} your vehicle {unit} was detected with a passenger near {location}."
 
+    ERROR = "Hello! An error occured while attempting to dial '{to_number}', alert type: {alert_type}."
+
     def format_message(self, **kwargs) -> str:
         return self.value.format(**kwargs)
