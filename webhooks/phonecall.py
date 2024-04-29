@@ -72,8 +72,6 @@ class TwilioCaller:
         self._sid = Config.TWILIO_SID
         self.client = Client(self._sid, self._token)
 
-        return None
-
     def send(self, to_number: str, msg: str) -> str:
         return self.client.calls.create(
             twiml=f"<Response><Say>{msg}</Say></Response>",
