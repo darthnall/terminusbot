@@ -11,5 +11,7 @@ class PhoneMessage(Enum):
     GEOFENCE_LEGAL = "Hello! At {pos_time} your vehicle {unit} was detected within {geo_name} near {location}."
     GEOFENCE_ILLEGAL = "Hello! At {pos_time} your vehicle {unit} was detected outside of {geo_name} near {location}."
 
+    PASSENGER_DETECTED = "Hello! At {pos_time} your vehicle {unit} was detected with a passenger near {location}."
+
     def format_message(self, **kwargs) -> str:
         return self.value.format(**kwargs)

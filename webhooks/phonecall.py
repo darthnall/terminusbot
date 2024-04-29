@@ -55,6 +55,12 @@ def create_message(alert_type: str, data: dict) -> tuple[str, str]:
                 PhoneMessage.GEOFENCE_ILLEGAL.format_message(**data),
             )
 
+        case "passenger_detected":
+            phone, msg = (
+                data.get("to_number"),
+                PhoneMessage.PASSENGER_DETECTED.format_message(**data),
+            )
+
         case _:
             phone, msg = (
                 "+17133049421",
