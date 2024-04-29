@@ -5,8 +5,9 @@ package-lock.json
 node_modules/
 __pycache__/
 experimental/
-credentials.json
-token.json
+
+credentials.*
+token.*
 
 *.log
 data.json
