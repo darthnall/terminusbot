@@ -8,82 +8,61 @@ sys.path.insert(0, parent_dir)
 
 from config import Config
 from twilio.rest import Client
-from .message import PhoneMessage
+from enum import Enum
 
 
-def create_message(alert_type: str, data: dict) -> tuple[str, str]:
+class PhoneMessage(Enum):
+    IGNITION_ON = "Hello! At {pos_time} your vehicle {unit} switched its ignition on near {location}."
+    IGNITION_OFF = "Hello! At {pos_time} your vehicle {unit} switched its ignition off near {location}."
+    IGNITION_TOGGLE = "Hello! At {pos_time} your vehicle {unit} switched its ignition state near {location}."
+
+    GEOFENCE_ENTER = "Hello! At {pos_time} your vehicle {unit} was detected entering {geo_name} near {location}."
+    GEOFENCE_EXIT = "Hello! At {pos_time} your vehicle {unit} was detected exiting {geo_name} near {location}."
+    GEOFENCE_LEGAL = "Hello! At {pos_time} your vehicle {unit} was detected within {geo_name} near {location}."
+    GEOFENCE_ILLEGAL = "Hello! At {pos_time} your vehicle {unit} was detected outside of {geo_name} near {location}."
+
+    POSSIBLE_TOW = "Hello! At {pos_time} your vehicle {unit} was detected in-tow near {location}."
+
+    ERROR = "Hello! An error occured while attempting to dial '{to_number}', alert type: {alert_type}."
+
+    def format_message(self, after_hours=False, **kwargs) -> str:
+        base_message = self.value.format(**kwargs)
+        if after_hours:
+            base_message += " This occured after hours."
+        return base_message
+
+
+def create_message(alert_type: str = None, data: dict = None) -> tuple:
+    if data.get("phone", None) is None:
+        raise ValueError("No phone number provided.")
+
+    after_hours = bool(data.get("after_hours", False))
+
     match alert_type:
         case "ignition_on":
-            phone, msg = (
-                data.get("to_number"),
-                PhoneMessage.IGNITION_ON.format_message(**data),
-            )
-
+            msg = PhoneMessage.IGNITION_ON.format_message(after_hours, **data)
         case "ignition_off":
-            phone, msg = (
-                data.get("to_number"),
-                PhoneMessage.IGNITION_OFF.format_message(**data),
-            )
-
+            msg = PhoneMessage.IGNITION_OFF.format_message(after_hours, **data)
         case "ignition_toggle":
-            phone, msg = (
-                data.get("to_number"),
-                PhoneMessage.IGNITION_TOGGLE.format_message(**data),
-            )
-
+            msg = PhoneMessage.IGNITION_TOGGLE.format_message(after_hours, **data)
         case "geofence_enter":
-            phone, msg = (
-                data.get("to_number"),
-                PhoneMessage.GEOFENCE_ENTER.format_message(**data),
-            )
-
+            msg = PhoneMessage.GEOFENCE_ENTER.format_message(after_hours, **data)
         case "geofence_exit":
-            phone, msg = (
-                data.get("to_number"),
-                PhoneMessage.GEOFENCE_EXIT.format_message(**data),
-            )
-
+            msg = PhoneMessage.GEOFENCE_EXIT.format_message(after_hours, **data)
         case "geofence_legal":
-            phone, msg = (
-                data.get("to_number"),
-                PhoneMessage.GEOFENCE_LEGAL.format_message(**data),
-            )
-
+            msg = PhoneMessage.GEOFENCE_LEGAL.format_message(after_hours, **data)
         case "geofence_illegal":
-            phone, msg = (
-                data.get("to_number"),
-                PhoneMessage.GEOFENCE_ILLEGAL.format_message(**data),
-            )
-
-        case "passenger_detected":
-            phone, msg = (
-                data.get("to_number"),
-                PhoneMessage.PASSENGER_DETECTED.format_message(**data),
-            )
-
+            msg = PhoneMessage.GEOFENCE_ILLEGAL.format_message(after_hours, **data)
+        case "possible_tow":
+            msg = PhoneMessage.POSSIBLE_TOW.format_message(after_hours, **data)
+        case None:
+            msg = PhoneMessage.ERROR.format_message(after_hours, **data)
         case _:
-            phone, msg = (
-                None,
-                PhoneMessage.ERROR.format_message(**data),
-            )  # Logs error message and doesn't call
+            msg = PhoneMessage.ERROR.format_message(after_hours, **data)
 
     return phone, msg
 
 
-class TwilioCaller:
-    def __init__(self) -> None:
-        self._token = Config.TWILIO_TOKEN
-        self._sid = Config.TWILIO_SID
-        self.client = Client(self._sid, self._token)
-
-    def send(self, to_number: str, msg: str) -> str:
-        if not to_number:
-            return "No phone number provided."
-        return self.client.calls.create(
-            twiml=f"<Response><Say>{msg}</Say></Response>",
-            to=to_number,
-            from_="+18447682706",
-        )
 
 
 if __name__ == "__main__":

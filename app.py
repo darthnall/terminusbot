@@ -42,15 +42,20 @@ def create_app():
         elif request.method == "POST":
             caller = TwilioCaller()
             alert_type = request.form.get('alert_type')
-            phone, msg = create_message(alert_type=alert_type, data=request.form)
 
-            if phone or msg is None:
+            to_number, msg = create_message(alert_type=alert_type, data=request.form)
+
+            try:
+                if isinstance(to_number, list):
+                    caller.batch_send(to_number, msg)
+                    status = "success"
+                else:
+                    caller.send(to_number, msg)
+                    status = "success"
+            except ValueError:
                 status = "failure"
-            else:
-                caller.send(to_number=phone, msg=msg)
-                status = "success"
 
-            return jsonify({"status": status, "phone": phone})
+            return jsonify({"status": status, "phone": to_number})
         else:
             pass
 

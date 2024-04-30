@@ -1,0 +1,38 @@
+from config import Config
+from twilio.rest import Client
+
+class TwilioCaller:
+    def __init__(self) -> None:
+        self._token = Config.TWILIO_TOKEN
+        self._sid = Config.TWILIO_SID
+        self.client = Client(self._sid, self._token)
+
+        return None
+
+    def batch_send(self, to_number: list[str], msg: str) -> None:
+        for phone in range(len(to_number)):
+            self.send(phone, msg)
+
+        return None
+
+    def send(self, phone: str, msg: str) -> None:
+        self.client.calls.create(
+            twiml=f"<Response><Say>{msg}</Say></Response>",
+            to=phone,
+            from_="+18447682706",
+        )
+
+        return None
+
+class PhoneNotifier:
+    def __init__(self) -> None:
+        self.caller = TwilioCaller()
+
+        return None
+
+    def notify(self, phone: str, msg: str) -> bool:
+        pass
+
+    def batch_notify(self, phones: list[str], msg: str) -> bool:
+        for phone in phones:
+            self.notify(phone, msg)
