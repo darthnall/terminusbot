@@ -1,5 +1,4 @@
 from enum import Enum
-
 from .errors import PhoneNumberNotFoundError
 
 class PhoneMessage(Enum):
@@ -24,7 +23,6 @@ class PhoneMessage(Enum):
 
 
 def create_message(alert_type: str = None, data: dict = None) -> tuple:
-    print(data)
     phone = data.get("to_number", None)
     after_hours = bool(data.get("after_hours", False))
 
