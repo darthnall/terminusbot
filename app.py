@@ -1,15 +1,17 @@
-from auth import Session, Validator, Searcher
+from auth import Session, Validator
 from client import Unit, User
 from client.form import create_registration_form
 
 from datetime import datetime
 
-from webhooks import TwilioCaller, create_message
+from webhooks.notifier import PhoneNotifier
+from webhooks.phonemessage import create_message
 
 from flask import Flask, render_template, request, jsonify
 from flask import session as flask_session
 
 from config import Config
+
 
 
 def create_app():
@@ -40,19 +42,20 @@ def create_app():
             return jsonify({"status": "success", "msg": "GET method not implemented."})
 
         elif request.method == "POST":
-            caller = TwilioCaller()
-            alert_type = request.form.get('alert_type')
+            caller = PhoneNotifier()
+            alert_type = request.form.get('alert_type', None)
 
             to_number, msg = create_message(alert_type=alert_type, data=request.form)
 
-            try:
-                if isinstance(to_number, list):
-                    caller.batch_send(to_number, msg)
-                    status = "success"
-                else:
-                    caller.send(to_number, msg)
-                    status = "success"
-            except ValueError:
+            if isinstance(to_number, list):
+                caller.batch_notify(to_number, msg)
+                status = "success"
+
+            elif isinstance(to_number, str):
+                caller.notify(to_number, msg)
+                status = "success"
+
+            else:
                 status = "failure"
 
             return jsonify({"status": status, "phone": to_number})

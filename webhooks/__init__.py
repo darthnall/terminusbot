@@ -1,2 +1,1 @@
-from .events import *
-from .phonecall import *
+from config import Config

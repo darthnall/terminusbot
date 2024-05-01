@@ -1,16 +1,6 @@
 import requests
 
-class TestEndpoint:
-    def __init__(self, name: str) -> None:
-        self.name = name
+import unittest
 
-class TestPost(TestEndpoint):
-    def __init__(self, name: str) -> None:
-        super().__init__(name)
-
-if __name__ == "__main__":
-    url = "http://localhost:5000/notify"
-    data = {"unit": "867730050861750"}
-
-    response = requests.post(url, json=data)
-    print(response.text)
+class PhoneNotificationTest(unittest.TestCase):
+    def test_send_notification(self, to_number: str = "+1713049421", msg: str = None) -> None:

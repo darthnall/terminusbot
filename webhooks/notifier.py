@@ -1,5 +1,5 @@
-from config import Config
 from twilio.rest import Client
+from config import Config
 
 class TwilioCaller:
     def __init__(self) -> None:
@@ -30,9 +30,15 @@ class PhoneNotifier:
 
         return None
 
-    def notify(self, phone: str, msg: str) -> bool:
-        pass
+    def notify(self, phone: str, msg: str) -> None:
+        try:
+            self.caller.send(phone, msg)
+        except Exception:
+            return None
 
-    def batch_notify(self, phones: list[str], msg: str) -> bool:
-        for phone in phones:
-            self.notify(phone, msg)
+    def batch_notify(self, phones: list[str], msg: str) -> None:
+        try:
+            for phone in phones:
+                self.notify(phone, msg)
+        except Exception:
+            return None
