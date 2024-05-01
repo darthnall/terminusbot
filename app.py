@@ -1,5 +1,5 @@
 from auth import Session, Validator
-from client import Unit, User
+from client import Unit, WialonUser
 from client.form import create_registration_form
 
 from datetime import datetime
@@ -18,6 +18,15 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = Config.SECRET_KEY
     app.config["SESSION_TYPE"] = "filesystem"
+
+    @app.route("/user/new", methods=["GET", "POST"])
+    def new_user():
+        if request.method == "GET":
+            title = "New User"
+            return render_template("user/register.html", title=title)
+        if request.method == "POST":
+            title = "New User"
+            return render_template("user/register.html", title=title)
 
     @app.route("/emailsignup", methods=["GET", "POST"])
     def emailsignup():
@@ -88,11 +97,10 @@ def create_app():
 
             if success:
                 with Session() as session:
-                    user = User(data=data, session=session)
+                    user = WialonUser(data=data, session=session)
                     user.create(
                         name=user.creds["email"], password=user.creds["password"]
                     )
-                    print("Created user in Wialon")
 
                     unit = Unit(
                         imei=user.creds["imeiNumber"],

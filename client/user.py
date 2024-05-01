@@ -1,12 +1,13 @@
-import secrets
-import string
+import secrets import string
 
 from auth import Session
 
 from . import EmailUser
 
+from wialon import flags as wialon_flag
 
-class User:
+
+class WialonUser:
     def __init__(self, data: dict[str, str], session: Session):
         self.session = session
         self.creds = {key: value for key, value in data.items()}
@@ -49,8 +50,15 @@ class User:
         return _success
 
     def set_default_flags(self) -> None:
-        flags = 0x02 + 0x10
+        flags = sum(
+            wialon_flag.ITEM_ACCESSFLAG_EDIT_IMAGE,
+            wialon_flag.ITEM_ACCESSFLAG_EDIT_NAME,
+            wialon_flag.ITEM_ACCESSFLAG_VIEW,
+            wialon_flag.ITEM_ACCESSFLAG_VIEW_CFIELDS,
+            wialon_flag.ITEM_ACCESSFLAG_VIEW_PROPERTIES,
+        )
         flags_mask = flags - 0x02
+
         params = {
             "userId": self.creds["userId"],
             "flags": flags,
