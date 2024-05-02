@@ -45,6 +45,11 @@ def create_app():
         else:
             return "404"
 
+    @app.route("/notify/video", methods=["POST"])
+    def notify_video():
+        data = request.json
+        return jsonify({"status": "success", "data": data})
+
     @app.route("/notify", methods=["GET", "POST"])
     def notify():
         if request.method == "GET":
