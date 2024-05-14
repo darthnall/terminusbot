@@ -1,4 +1,5 @@
-import secrets import string
+import secrets
+import string
 
 from auth import Session
 

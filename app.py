@@ -1,3 +1,5 @@
+import requests
+
 from auth import Session, Validator
 from client import Unit, WialonUser
 from client.form import create_registration_form
@@ -11,7 +13,6 @@ from flask import Flask, render_template, request, jsonify
 from flask import session as flask_session
 
 from config import Config
-
 
 
 def create_app():
@@ -41,7 +42,9 @@ def create_app():
                 print(f"{datetime.now()} - {email = }")
                 success = True
 
-            return render_template("partials/emailsignup.html", email=email, success=success)
+            return render_template(
+                "partials/emailsignup.html", email=email, success=success
+            )
         else:
             return "404"
 
@@ -57,7 +60,7 @@ def create_app():
 
         elif request.method == "POST":
             caller = PhoneNotifier()
-            alert_type = request.form.get('alert_type', None)
+            alert_type = request.form.get("alert_type", None)
 
             to_number, msg = create_message(alert_type=alert_type, data=request.form)
 
@@ -78,8 +81,8 @@ def create_app():
 
     @app.route("/", methods=["GET", "POST"])
     def register():
+        form = create_registration_form()
         if request.method == "GET":
-            form = create_registration_form()
             flask_session["REGISTRATION_FORM"] = form
 
             form["imeiNumber"].user_input = request.args.get("imei")
@@ -93,40 +96,25 @@ def create_app():
             data = request.form
             success = False
             title = "Failure"
-
-            bad_items = Validator().validate_all(data=data)
-
-            if len(bad_items) == 0:
-                success = True
-                title = "Success!"
+            response = None
 
             if success:
-                with Session() as session:
-                    user = WialonUser(data=data, session=session)
-                    user.create(
-                        name=user.creds["email"], password=user.creds["password"]
-                    )
+                params = {
+                    "email": data.get("email"),
+                    "imei": data.get("imeiNumber"),
+                    "asset_name": data.get("assetName"),
+                }
+                response = requests.post(
+                    "https://api.terminusgps.com/v1/forms/create_wialon_user",
+                    params=params,
+                )
 
-                    unit = Unit(
-                        imei=user.creds["imeiNumber"],
-                        name=user.creds["assetName"],
-                        session=session,
-                    )
-                    unit.assign(user_id=user.creds["userId"])
-                    print("Created unit in Wialon and assigned to user")
-
-                    if user.email_creds():
-                        print("Email sent successfully")
-
-            # Reset the form after submission
-            form = create_registration_form()
-            flask_session["REGISTRATION_FORM"] = form
             return render_template(
                 "register.html",
                 title=title,
                 form=form,
                 success=success,
-                bad_items=bad_items,
+                response=response,
             )
 
         else:
