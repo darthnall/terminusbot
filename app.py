@@ -1,7 +1,6 @@
 import requests
 
-from auth import Session, Validator
-from client import Unit, WialonUser
+from auth import Validator
 from client.form import create_registration_form
 
 from datetime import datetime
@@ -9,124 +8,67 @@ from datetime import datetime
 from webhooks.notifier import PhoneNotifier
 from webhooks.phonemessage import create_message
 
-from flask import Flask, render_template, request, jsonify
-from flask import session as flask_session
+from flask import Flask, session, render_template, request, jsonify
 
 from config import Config
 
 
 def create_app():
     app = Flask(__name__)
-    app.secret_key = Config.SECRET_KEY
-    app.config["SESSION_TYPE"] = "filesystem"
-
-    @app.route("/user/new", methods=["GET", "POST"])
-    def new_user():
-        if request.method == "GET":
-            title = "New User"
-            return render_template("user/register.html", title=title)
-        if request.method == "POST":
-            title = "New User"
-            return render_template("user/register.html", title=title)
-
-    @app.route("/emailsignup", methods=["GET", "POST"])
-    def emailsignup():
-        if request.method == "GET":
-            return render_template("emailsignup.html")
-        if request.method == "POST":
-            success = False
-            email = request.form.get("email")
-            consent = bool(request.form.get("consent"))
-
-            if consent:
-                print(f"{datetime.now()} - {email = }")
-                success = True
-
-            return render_template(
-                "partials/emailsignup.html", email=email, success=success
-            )
-        else:
-            return "404"
-
-    @app.route("/notify/video", methods=["POST"])
-    def notify_video():
-        data = request.json
-        return jsonify({"status": "success", "data": data})
-
-    @app.route("/notify", methods=["GET", "POST"])
-    def notify():
-        if request.method == "GET":
-            return jsonify({"status": "success", "msg": "GET method not implemented."})
-
-        elif request.method == "POST":
-            caller = PhoneNotifier()
-            alert_type = request.form.get("alert_type", None)
-
-            to_number, msg = create_message(alert_type=alert_type, data=request.form)
-
-            if isinstance(to_number, list):
-                caller.batch_notify(to_number, msg)
-                status = "success"
-
-            elif isinstance(to_number, str):
-                caller.notify(to_number, msg)
-                status = "success"
-
-            else:
-                status = "failure"
-
-            return jsonify({"status": status, "phone": to_number})
-        else:
-            pass
+    app.config.update(
+        TESTING=True,
+        SECRET_KEY=Config.SECRET_KEY,
+    )
+    app.config.from_object(__name__)
 
     @app.route("/", methods=["GET", "POST"])
     def register():
         form = create_registration_form()
+        if "imeiNumber" in session:
+            imei = session["imeiNumber"]
+
         if request.method == "GET":
-            flask_session["REGISTRATION_FORM"] = form
-
-            form["imeiNumber"].user_input = request.args.get("imei")
-
             return render_template(
-                "register.html", title="Registration", form=form, success=None
+                "register.html",
+                title="Register",
+                success=None,
+                form=create_registration_form(),
             )
 
-        elif request.method == "POST":
-            form = flask_session["REGISTRATION_FORM"]
-            data = request.form
-            success = False
-            title = "Failure"
-            response = None
-
-            if success:
-                params = {
-                    "email": data.get("email"),
-                    "imei": data.get("imeiNumber"),
-                    "asset_name": data.get("assetName"),
-                }
-                response = requests.post(
-                    "https://api.terminusgps.com/v1/forms/create_wialon_user",
-                    params=params,
-                )
+        if request.method == "POST":
+            params = {
+                "email": session["email"]["user_input"],
+                "imei": session["imeiNumber"]["user_input"],
+                "asset_name": session["assetName"]["user_input"],
+            }
+            requests.post(
+                "https://api.terminusgps.com/v1/forms/create_wialon_user", params=params
+            )
 
             return render_template(
                 "register.html",
-                title=title,
-                form=form,
-                success=success,
-                response=response,
+                title="Register",
+                success=True,
+                form=form.update(
+                    {
+                        "firstName": session["firstName"]["user_input"],
+                        "lastName": session["lastName"]["user_input"],
+                        "email": session["email"]["user_input"],
+                        "assetName": session["assetName"]["user_input"],
+                        "imeiNumber": session["imeiNumber"]["user_input"],
+                        "vinNumber": session["vinNumber"]["user_input"],
+                        "phoneNumber": session["phoneNumber"]["user_input"],
+                    }
+                ),
             )
-
-        else:
-            return "404"
 
     @app.route("/v/first-name", methods=["POST"])
     def validate_first_name():
-        field = flask_session["REGISTRATION_FORM"]["firstName"]
+        field = session["REGISTRATION_FORM"]["firstName"]
         _valid = False
         _input = request.form.get("firstName")
 
-        _valid, _msg = Validator().validate_name(target=_input)
+        _valid, _msg = Validator().validate_first_name(target=_input)
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -136,11 +78,11 @@ def create_app():
 
     @app.route("/v/last-name", methods=["POST"])
     def validate_last_name():
-        field = flask_session["REGISTRATION_FORM"]["lastName"]
+        field = session["REGISTRATION_FORM"]["lastName"]
         _valid = False
         _input = request.form.get("lastName")
 
-        _valid, _msg = Validator().validate_name(target=_input)
+        _valid, _msg = Validator().validate_last_name(target=_input)
 
         print(f"{_valid = } {_msg = } {_input = }")
 
@@ -150,7 +92,7 @@ def create_app():
 
     @app.route("/v/email", methods=["POST"])
     def validate_email():
-        field = flask_session["REGISTRATION_FORM"]["email"]
+        field = session["REGISTRATION_FORM"]["email"]
         _valid = False
         _input = request.form.get("email")
 
@@ -164,7 +106,7 @@ def create_app():
 
     @app.route("/v/asset-name", methods=["POST"])
     def validate_asset_name():
-        field = flask_session["REGISTRATION_FORM"]["assetName"]
+        field = session["REGISTRATION_FORM"]["assetName"]
         _valid = False
         _input = request.form.get("assetName")
 
@@ -178,7 +120,7 @@ def create_app():
 
     @app.route("/v/phone-number", methods=["POST"])
     def validate_phone_number():
-        field = flask_session["REGISTRATION_FORM"]["phoneNumber"]
+        field = session["REGISTRATION_FORM"]["phoneNumber"]
         _valid = False
         _input = request.form.get("phoneNumber")
 
@@ -192,7 +134,7 @@ def create_app():
 
     @app.route("/v/imei-number", methods=["POST"])
     def validate_imei():
-        field = flask_session["REGISTRATION_FORM"]["imeiNumber"]
+        field = session["REGISTRATION_FORM"]["imeiNumber"]
 
         _valid = False
         _input = request.form.get("imeiNumber")
@@ -207,7 +149,7 @@ def create_app():
 
     @app.route("/v/vin-number", methods=["POST"])
     def validate_vin():
-        field = flask_session["REGISTRATION_FORM"]["vinNumber"]
+        field = session["REGISTRATION_FORM"]["vinNumber"]
 
         _valid = False
         _input = request.form.get("vinNumber")

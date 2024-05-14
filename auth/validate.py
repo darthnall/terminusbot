@@ -105,14 +105,12 @@ class Validator:
                     f"Email must be less than 60 characters. Length: {len(target)}",
                 )
             case _:
-                addr = target.split("@")
-                if addr[1].endswith(valid_endings):
-                    _valid, msg = True, "Looks good!"
-                else:
-                    _valid, msg = (
-                        False,
-                        f"Email must contain a valid domain. Valid domains: {valid_endings}",
-                    )
+                try:
+                    addr = target.split("@")
+                    if addr[1].endswith(valid_endings):
+                        _valid, msg = True, "Looks good!"
+                except IndexError:
+                    _valid, msg = False, "Email must contain an '@' symbol."
 
         return _valid, msg
 
@@ -125,7 +123,10 @@ class Validator:
             case target if target.isdigit() is False:
                 _valid, msg = False, "Phone # must be digits only."
             case target if len(target) > 15:
-                _valid, msg = False, f"Phone number must be less than 15 characters. Length: {len(target)}"
+                _valid, msg = (
+                    False,
+                    f"Phone number must be less than 15 characters. Length: {len(target)}",
+                )
             case _:
                 _valid, msg = True, "Looks good!"
 
@@ -133,27 +134,16 @@ class Validator:
 
     def validate_imei_number(self, target: str | None) -> tuple[bool, str]:
         _valid, msg = init_validation(target=target)
-        search = Searcher()
 
         match target:
             case "" | None:
                 _valid, msg = False, "Please input your IMEI #."
             case target if not target.isdigit():
                 _valid, msg = False, "IMEI # must be digits only."
-            case target if len(target) != 15:
+            case target if len(target) >= 17:
                 _valid, msg = (
                     False,
-                    f"IMEI # must be exactly 15 characters. Length: {len(target)}",
-                )
-            case target if not search.unit_is_available(imei=target):
-                _valid, msg = (
-                    False,
-                    "Invalid unit. support@terminusgps.com has been notified of this error.",
-                )
-            case target if not search.by_imei(imei=target):
-                _valid, msg = (
-                    False,
-                    "Couldn't find associated unit. Try again or call if issue persists.",
+                    f"IMEI # must be less than or equal to 17 characters. Length: {len(target)}",
                 )
             case _:
                 _valid, msg = True, "Looks good!"

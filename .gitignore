@@ -3,6 +3,7 @@
 
 package-lock.json
 node_modules/
+sessions/
 __pycache__/
 experimental/
 credentials.json
