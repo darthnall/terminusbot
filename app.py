@@ -24,22 +24,19 @@ def create_app():
     @app.route("/", methods=["GET", "POST"])
     def register():
         form = create_registration_form()
-        if "imeiNumber" in session:
-            imei = session["imeiNumber"]
-
         if request.method == "GET":
             return render_template(
                 "register.html",
                 title="Register",
                 success=None,
-                form=create_registration_form(),
+                form=form,
             )
 
         if request.method == "POST":
             params = {
-                "email": session["email"]["user_input"],
-                "imei": session["imeiNumber"]["user_input"],
-                "asset_name": session["assetName"]["user_input"],
+                "email": request.values.get("email"),
+                "imei": request.values.get("imeiNumber"),
+                "asset_name": request.values.get("assetName"),
             }
             requests.post(
                 "https://api.terminusgps.com/v1/forms/create_wialon_user", params=params
@@ -49,17 +46,7 @@ def create_app():
                 "register.html",
                 title="Register",
                 success=True,
-                form=form.update(
-                    {
-                        "firstName": session["firstName"]["user_input"],
-                        "lastName": session["lastName"]["user_input"],
-                        "email": session["email"]["user_input"],
-                        "assetName": session["assetName"]["user_input"],
-                        "imeiNumber": session["imeiNumber"]["user_input"],
-                        "vinNumber": session["vinNumber"]["user_input"],
-                        "phoneNumber": session["phoneNumber"]["user_input"],
-                    }
-                ),
+                form=form,
             )
 
     @app.route("/v/first-name", methods=["POST"])
