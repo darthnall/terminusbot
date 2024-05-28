@@ -22,7 +22,7 @@ class RegistrationField(dict):
 
 
 class RegistrationForm:
-    def __init__(self) -> None:
+    def __init__(self, imei: str = "") -> None:
         self.first_name = RegistrationField(
             id="firstName",
             display_as="First Name",
@@ -52,6 +52,7 @@ class RegistrationForm:
             id="imeiNumber",
             display_as="IMEI",
             placeholder="IMEI #",
+            user_input=imei,
             validation_endpoint="/v/imei-number",
         )
         self.phone = RegistrationField(
@@ -87,7 +88,7 @@ class Field:
     validation_msg: str | None = None
 
 
-def create_registration_form() -> dict[str, Field]:
+def create_registration_form(imei: Optional[str]) -> dict[str, Field]:
     return {
         "firstName": Field(
             "firstName",
@@ -121,6 +122,7 @@ def create_registration_form() -> dict[str, Field]:
             "IMEI #",
             placeholder="IMEI",
             validation_endpoint="/v/imei-number",
+            user_input=imei,
             required=True,
         ),
         "phoneNumber": Field(

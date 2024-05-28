@@ -1,156 +1,81 @@
-from config import Config
-
+from typing import Callable, List, Tuple, Dict
 from . import Searcher
-
-
-def init_validation(target: str | None) -> tuple[bool, str]:
-    # Set default validation state and message
-    return False, f"Invalid input: {target}"
+import phonenumbers
+from vininfo import Vin
 
 
 class Validator:
-    def __init__(self) -> None:
-        self._token = Config.WIALON_HOSTING_API_TOKEN
+    def __init__(
+        self, target: str, validators: List[Callable[[str], Tuple[bool, str]]]
+    ) -> None:
+        self.target = target
+        self.validators = validators
+        self.results = self.validate()
 
-    def _has_banned_character(self, target: str) -> bool:
-        has_banned_character = False
-        banned_characters = ["*"]
+    def validate(self) -> Dict[str, Dict[str, str]]:
+        results = {}
+        for validator in self.validators:
+            is_valid, msg = validator(self.target)
+            results[validator.__name__] = {"is_valid": is_valid, "msg": msg}
+        return results
 
-        match target:
-            case target if any(char in target for char in banned_characters):
-                has_banned_character = True
+    def is_valid(self) -> bool:
+        return all(result["is_valid"] for result in self.results.values())
 
-        return has_banned_character
 
-    def validate_all(self, data: dict[str, str]) -> list[str | None]:
-        results = {
-            self.validate_first_name(target=data["firstName"]),
-            self.validate_last_name(target=data["lastName"]),
-            self.validate_email(target=data["email"]),
-            self.validate_asset_name(target=data["assetName"]),
-            self.validate_imei_number(target=data["imeiNumber"]),
-            self.validate_phone_number(target=data["phoneNumber"]),
-            self.validate_vin_number(target=data["vinNumber"]),
-        }
-        # Return a list containing invalid results
-        return [result[1] for result in results if result[0] is False]
+def validate_is_digit(target: str) -> Tuple[bool, str]:
+    is_valid, msg = True, "Good to go!"
+    if not target.isdigit():
+        is_valid, msg = False, "Must be digits only."
+    return is_valid, msg
 
-    def validate_first_name(self, target: str | None) -> tuple[bool, str]:
-        _valid, msg = init_validation(target=target)
 
-        match target:
-            case "" | None:
-                _valid, msg = False, "Please input a name."
-            case target if self._has_banned_character(target=target):
-                _valid, msg = False, "Name contains invalid character."
-            case target if not target.lower().isalpha():
-                _valid, msg = False, "Name can only contain letters."
-            case _:
-                _valid, msg = True, "Looks good!"
+def validate_min_length(target: str, length: int = 4) -> Tuple[bool, str]:
+    is_valid, msg = True, "Good to go!"
+    if len(target) < length:
+        is_valid, msg = False, f"Must be longer than {length} characters."
+    return is_valid, msg
 
-        return _valid, msg
 
-    def validate_last_name(self, target: str | None) -> tuple[bool, str]:
-        _valid, msg = init_validation(target=target)
+def validate_max_length(target: str, length: int = 64) -> Tuple[bool, str]:
+    is_valid, msg = True, "Good to go!"
+    if len(target) > length:
+        is_valid, msg = False, f"Must be shorter than {length} characters."
+    return is_valid, msg
 
-        match target:
-            case "" | None:
-                _valid, msg = False, "Please input a name."
-            case target if self._has_banned_character(target=target):
-                _valid, msg = False, "Name contains invalid character."
-            case target if not target.lower().isalpha():
-                _valid, msg = False, "Name can only contain letters."
-            case _:
-                _valid, msg = True, "Looks good!"
 
-        return _valid, msg
+def validate_vin(target) -> Tuple[bool, str]:
+    is_valid, msg = True, "Good to go!"
+    vin = Vin(target)
+    return is_valid, msg
 
-    def validate_asset_name(self, target: str | None) -> tuple[bool, str]:
-        _valid, msg = init_validation(target=target)
 
-        match target:
-            case "" | None:
-                _valid, msg = False, "Please input a name for your new asset."
-            case target if len(target) > 60:
-                _valid, msg = (
-                    False,
-                    f"Name must be under 60 characters. Input was {len(target)} characters.",
-                )
-            case target if self._has_banned_character(target=target):
-                _valid, msg = False, "Name contains invalid character."
-            case _:
-                _valid, msg = True, "Looks good!"
+def validate_unit(target: str) -> Tuple[bool, str]:
+    is_valid, msg = True, "Good to go!"
+    searcher = Searcher()
 
-        return _valid, msg
+    id = searcher.by_imei(target)
+    if not id:
+        is_valid, msg = False, "Unit not found."
 
-    def validate_email(self, target: str | None) -> tuple[bool, str]:
-        _valid, msg = init_validation(target=target)
+    if not searcher.unit_is_available(target):
+        is_valid, msg = False, "Unit is not available."
 
-        valid_endings: tuple = (
-            ".com",
-            ".net",
-            ".edu",
-            ".org",
-            ".gov",
-            ".me",
-            ".io",
-        )
+    return is_valid, msg
 
-        match target:
-            case "" | None:
-                _valid, msg = False, "Please input your email address."
-            case target if len(target) > 60:
-                _valid, msg = (
-                    False,
-                    f"Email must be less than 60 characters. Length: {len(target)}",
-                )
-            case _:
-                try:
-                    addr = target.split("@")
-                    if addr[1].endswith(valid_endings):
-                        _valid, msg = True, "Looks good!"
-                except IndexError:
-                    _valid, msg = False, "Email must contain an '@' symbol."
 
-        return _valid, msg
+def validate_phone(target) -> Tuple[bool, str]:
+    is_valid, msg = True, "Good to go!"
+    try:
+        num = phonenumbers.parse(target, None)
 
-    def validate_phone_number(self, target: str | None) -> tuple[bool, str]:
-        _valid, msg = init_validation(target=target)
+        if not phonenumbers.is_possible_number(num):
+            is_valid, msg = False, "Unavailable phone number."
 
-        match target:
-            case "" | None:
-                _valid, msg = True, "Looks good!"
-            case target if target.isdigit() is False:
-                _valid, msg = False, "Phone # must be digits only."
-            case target if len(target) > 15:
-                _valid, msg = (
-                    False,
-                    f"Phone number must be less than 15 characters. Length: {len(target)}",
-                )
-            case _:
-                _valid, msg = True, "Looks good!"
+        if not phonenumbers.is_valid_number(num):
+            is_valid, msg = False, "Invalid phone number."
 
-        return _valid, msg
+    except phonenumbers.phonenumberutil.NumberParseException:
+        is_valid, msg = False, "Invalid phone number."
 
-    def validate_imei_number(self, target: str | None) -> tuple[bool, str]:
-        _valid, msg = init_validation(target=target)
-
-        match target:
-            case "" | None:
-                _valid, msg = False, "Please input your IMEI #."
-            case target if not target.isdigit():
-                _valid, msg = False, "IMEI # must be digits only."
-            case target if len(target) >= 17:
-                _valid, msg = (
-                    False,
-                    f"IMEI # must be less than or equal to 17 characters. Length: {len(target)}",
-                )
-            case _:
-                _valid, msg = True, "Looks good!"
-
-        return _valid, msg
-
-    def validate_vin_number(self, target: str | None) -> tuple[bool, str]:
-        _valid, msg = init_validation(target=target)
-        _valid, msg = True, "Looks good!"
-        return _valid, msg
+    return is_valid, msg

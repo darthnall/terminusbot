@@ -15,7 +15,7 @@ class Searcher:
     def search(self, params: dict, session: Session) -> dict:
         return session.wialon_api.core_search_items(**params)
 
-    def by_imei(self, imei: int) -> int | None:
+    def by_imei(self, imei: str) -> str | None:
         """
         Search for an item by its IMEI number.
 
@@ -29,7 +29,7 @@ class Searcher:
         __id: <int | None>
             The ID of the item if found, otherwise None.
         """
-        __id: int | None = None
+        __id: str | None = None
 
         params = {
             "spec": {
@@ -47,7 +47,7 @@ class Searcher:
         # Open a session and search for the item
         with Session() as session:
             response = self.search(params=params, session=session)
-            __id = int(response["items"][0]["id"])
+            __id = response["items"][0]["id"]
 
         return __id
 
