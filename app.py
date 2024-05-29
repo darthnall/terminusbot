@@ -1,11 +1,9 @@
 import requests
 
-from auth import Validator
 from client.form import create_registration_form
 from config import Config
 from flask import (
     Flask,
-    session,
     render_template,
     request,
 )
@@ -21,7 +19,7 @@ def create_app():
 
     @app.route("/", methods=["GET", "POST"])
     def register():
-        if request.args:
+        if request.args and request.method == "GET":
             form = create_registration_form(request.args.get("imei"))
         else:
             form = create_registration_form(None)
@@ -41,7 +39,7 @@ def create_app():
                 "asset_name": request.values.get("assetName"),
             }
             requests.post(
-                "https://api.terminusgps.com/v1/forms/create_wialon_user", params=params
+                "https://api.terminusgps.com/v1/forms/wialon/create_user", params=params
             )
 
             return render_template(
